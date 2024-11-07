@@ -1,6 +1,3 @@
-"""
-Server receiver of the file
-"""
 import socket
 import tqdm
 import os
@@ -12,8 +9,14 @@ def process_handler():
 
     # receive the file infos
     # receive using client socket, not server socket
-    received = client_socket.recv(BUFFER_SIZE).decode()
-    filename, filesize = received.split(SEPARATOR)
+    try:
+        received = client_socket.recv(BUFFER_SIZE)
+        filename, filesize = received.decode('utf-8', errors='ignore').split(SEPARATOR)
+    except UnicodeDecodeError:
+        print("Could not decode received data, check sender encoding or handle as binary.")
+        client_socket.close()
+        return
+
     # remove absolute path if there is
     filename = os.path.basename(filename)
     # convert to integer
@@ -55,7 +58,7 @@ if __name__ == "__main__":
     print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
     # accept connection if there is any
     client_socket, address = s.accept() 
-    thread = threading.Thread(target=process_handler())
+    thread = threading.Thread(target=process_handler)
     thread.start()
     thread.join()
 
