@@ -1,51 +1,31 @@
-"""
-Client that sends the file (uploads)
-"""
 import socket
-import tqdm
-import os
-import argparse
 
-SEPARATOR = "<SEPARATOR>"
-BUFFER_SIZE = 1024 * 4 #4KB
 
-def send_file(filename, host, port):
-    # get the file size
-    filesize = os.path.getsize(filename)
-    # create the client socket
-    s = socket.socket()
-    print(f"[+] Connecting to {host}:{port}")
-    s.connect((host, port))
-    print("[+] Connected.")
+def server_program():
+    # get the hostname
+    host = socket.gethostname()
+    port = 8000  # initiate port no above 1024
 
-    # send the file-name and file-size
-    s.send(f"{filename}{SEPARATOR}{filesize}".encode())
+    server_socket = socket.socket()  # get instance
+    # look closely. The bind() function takes tuple as argument
+    server_socket.bind((host, port))  # bind host address and port together
 
-    # start sending the file
-    progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-    with open(filename, "rb") as f:
-        while True:
-            # read the bytes from the file
-            bytes_read = f.read(BUFFER_SIZE)
-            if not bytes_read:
-                # file transmitting is done
-                break
-            # we use sendall to assure transmission in busy networks
-            s.sendall(bytes_read)
-            # update the progress bar
-            progress.update(len(bytes_read))
+    # configure how many client the server can listen simultaneously
+    server_socket.listen(2)
+    conn, address = server_socket.accept()  # accept new connection
+    print("Connection from: " + str(address))
+    while True:
+        # receive data stream. it won't accept data packet greater than 1024 bytes
+        data = conn.recv(1024).decode()
+        if not data:
+            # if data is not received break
+            break
+        print("from connected user: " + str(data))
+        data = input(' -> ')
+        conn.send(data.encode())  # send data to the client
 
-    # close the socket
-    s.close()
+    conn.close()  # close the connection
 
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Simple File Sender")
-    parser.add_argument("file", help="File name to send")
-    parser.add_argument("host", help="The host/IP address of the receiver")
-    parser.add_argument("-p", "--port", help="Port to use, default is 5001", default=5001)
-    args = parser.parse_args()
-    filename = args.file
-    host = args.host
-    port = args.port
-    send_file(filename, host, port)
+
+if __name__ == '__main__':
+    server_program()
