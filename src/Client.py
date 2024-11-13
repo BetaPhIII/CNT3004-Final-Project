@@ -4,21 +4,17 @@ Client that sends the file (uploads)
 import socket
 import tqdm
 import os
-import argparse
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 1024 * 4 #4KB
 
-def send_file(filename, host, port):
+def send_file(filename):
     # get the file size
     filesize = os.path.getsize(filename)
     # create the client socket
-    s = socket.socket()
-    print(f"[+] Connecting to {host}:{port}")
-    s.connect((host, port))
-    print("[+] Connected.")
 
-    # send the filename and filesize
+
+    # send the file-name and file-size
     s.send(f"{filename}{SEPARATOR}{filesize}".encode())
 
     # start sending the file
@@ -30,8 +26,7 @@ def send_file(filename, host, port):
             if not bytes_read:
                 # file transmitting is done
                 break
-            # we use sendall to assure transimission in 
-            # busy networks
+            # we use sendall to assure transmission in busy networks
             s.sendall(bytes_read)
             # update the progress bar
             progress.update(len(bytes_read))
@@ -39,14 +34,13 @@ def send_file(filename, host, port):
     # close the socket
     s.close()
 
-if __name__ == "__main__":
-    import argparse
-    parser = argparse.ArgumentParser(description="Simple File Sender")
-    parser.add_argument("file", help="File name to send")
-    parser.add_argument("host", help="The host/IP address of the receiver")
-    parser.add_argument("-p", "--port", help="Port to use, default is 5001", default=5001)
-    args = parser.parse_args()
-    filename = args.file
-    host = args.host
-    port = args.port
-    send_file(filename, host, port)
+host = input("What IP would you like to connect to?")
+
+s = socket.socket()
+print(f"[+] Connecting to {host}:{5001}")
+s.connect((host, 5001))
+print("[+] Connected.")
+
+fileName = input("What file would you like to send?")
+
+send_file(fileName)
