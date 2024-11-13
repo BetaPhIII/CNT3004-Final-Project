@@ -3,64 +3,63 @@ import tqdm
 import os
 import threading
 
-def process_handler():
-    # if below code is executed, that means the sender is connected
+def process_handler(client_socket, address):
     print(f"[+] {address} is connected.")
 
-    # receive the file infos
-    # receive using client socket, not server socket
+    # receive and parse file metadata
+    received = b""
+    while SEPARATOR.encode() not in received:
+        # keep receiving until the SEPARATOR is found
+        received += client_socket.recv(BUFFER_SIZE)
+
     try:
-        received = client_socket.recv(BUFFER_SIZE)
-        filename, filesize = received.decode('utf-8', errors='ignore').split(SEPARATOR)
-    except UnicodeDecodeError:
-        print("Could not decode received data, check sender encoding or handle as binary.")
+        # split only once at the first occurrence of SEPARATOR
+        received = received.decode('utf-8', errors='ignore')
+        filename, filesize = received.split(SEPARATOR, 1)
+        filesize = int(filesize)
+    except (UnicodeDecodeError, ValueError) as e:
+        print(f"Error while decoding metadata: {e}")
         client_socket.close()
         return
 
     # remove absolute path if there is
     filename = os.path.basename(filename)
-    # convert to integer
-    filesize = int(filesize)
+
     # start receiving the file from the socket
-    # and writing to the file stream
     progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "wb") as f:
-        while True:
-            # read 1024 bytes from the socket (receive)
+        bytes_received = 0  # track how much was already received
+        while bytes_received < filesize:
             bytes_read = client_socket.recv(BUFFER_SIZE)
-            if not bytes_read:    
-                # nothing is received
-                # file transmitting is done
+            if not bytes_read:
+                # nothing is received, file transmission is done
                 break
-            # write to the file the bytes we just received
             f.write(bytes_read)
-            # update the progress bar
+            bytes_received += len(bytes_read)
             progress.update(len(bytes_read))
-    # close the client socket
+
+    print(f"[+] Finished receiving {filename} from {address}")
     client_socket.close()
 
 if __name__ == "__main__":
     # device's IP address
-    SERVER_HOST = "10.221.82.200"
+    SERVER_HOST = "10.221.84.102"
     SERVER_PORT = 5001
     # receive 4096 bytes each time
     BUFFER_SIZE = 4096
     SEPARATOR = "<SEPARATOR>"
+
     # create the server socket
-    # TCP socket
     s = socket.socket()
     # bind the socket to our local address
     s.bind((SERVER_HOST, SERVER_PORT))
-    # enabling our server to accept connections
-    # 5 here is the number of unaccepted connections that
-    # the system will allow before refusing new connections
+    # enabling the server to accept connections
     s.listen(5)
     print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
-    # accept connection if there is any
-    client_socket, address = s.accept() 
-    thread = threading.Thread(target=process_handler)
-    thread.start()
-    thread.join()
 
-    # close the server socket
-    s.close()
+    # keep server running to accept multiple connections
+    while True:
+        client_socket, address = s.accept()
+        # create a new thread for each client connection
+        thread = threading.Thread(target=process_handler, args=(client_socket, address))
+        thread.start()
