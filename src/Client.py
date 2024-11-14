@@ -35,12 +35,12 @@ def send_file(filename):
     s.close()
 
 host = input("What IP would you like to connect to?")
-
 s = socket.socket()
 print(f"[+] Connecting to {host}:{5001}")
 s.connect((host, 5001))
 print("[+] Connected.")
-
-fileName = input("What file would you like to send?")
-
-send_file(fileName)
+status = ""
+while status != "exit":
+    fileName = input("What file would you like to send?")
+    send_file(fileName)
+    status = input("Press enter to continue or type 'exit' to exit")
