@@ -38,12 +38,25 @@ def process_handler(client_socket, address):
             bytes_received += len(bytes_read)
             progress.update(len(bytes_read))
 
+
     print(f"[+] Finished receiving {filename} from {address}")
     client_socket.close()
 
+def get_local_ip():
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # This doesn't need to connect, but it sets the correct address
+        s.connect(("8.8.8.8", 80))  # Use Google's public DNS server to determine your network address
+        ip = s.getsockname()[0]
+    except Exception as e:
+        ip = "127.0.0.1"  # Fallback to localhost in case of any error
+    finally:
+        s.close()
+    return ip
+
 if __name__ == "__main__":
     # device's IP address
-    SERVER_HOST = "10.221.84.102"
+    SERVER_HOST = get_local_ip()
     SERVER_PORT = 5001
     # receive 4096 bytes each time
     BUFFER_SIZE = 4096
