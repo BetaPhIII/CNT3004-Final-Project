@@ -59,12 +59,18 @@ if(response != 'Login Failed'):
     print("[+] Connected.")
     status = ""
     while status != "exit":
-        fileName = input("What file would you like to send?")
-        if not os.path.isfile(fileName):
-            print(f"File '{fileName}' not found.")
-        else:
-            send_file(fileName)
-        status = input("Press enter to continue or type 'exit' to exit")
+        operation = input("Type 'Send to send a file to the server, \nType 'Download' to download a file from the server, \nor type 'View' to view the server directory.")
+        if operation == "Send":
+            print(os.listdir())
+            fileName = input("What file would you like to send? \n")
+            if not os.path.isfile(fileName):
+                print(f"File '{fileName}' not found.")
+            else:
+                send_file(fileName)
+        elif operation == "Download":
+
+        elif operation == "View":
+        status = input("\nPress enter to continue or type 'exit' to exit.\n")
 else:
     print(response, "\nConnection closed")
     s.close()
