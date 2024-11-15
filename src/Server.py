@@ -3,8 +3,34 @@ import tqdm
 import os
 import threading
 import hashlib
+import csv
 
 HashTable = {}
+def load_data_from_csv(file):
+    if os.path.exists(file):
+        with open(file, mode='r', newline='') as file:
+            reader = csv.reader(file)
+            # Skip the header if it exists
+            for row in reader:
+                if len(row) == 2:  # Ensure valid rows
+                    key, value = row
+                    HashTable[key] = value
+        print("{:<8} {:<20}".format('USER','PASSWORD'))
+        for k, v in HashTable.items():
+            label, num = k,v
+            print("{:<8} {:<20}".format(label, num))
+        print("-------------------------------------------")
+    else:
+        try:
+            open(file, mode='w', newline='')
+        except Exception as e:
+            print(e, "Error creating csv file")
+    return HashTable
+
+def add(file, key, value):
+     with open(file, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([key, value])
 
 def process_handler(client_socket, address):
     client_socket.send(str.encode('ENTER USERNAME : ')) # Request Username
@@ -18,6 +44,7 @@ def process_handler(client_socket, address):
 # If new user,  regiter in Hashtable Dictionary  
     if name not in HashTable:
         HashTable[name] = password
+        add("RESOURCES.csv", name, password)
         client_socket.send(str.encode('Registeration Successful')) 
         print('Registered : ',name)
         print("{:<8} {:<20}".format('USER','PASSWORD'))
@@ -70,9 +97,17 @@ def process_handler(client_socket, address):
             bytes_received += len(bytes_read)
             progress.update(len(bytes_read))
 
-
     print(f"[+] Finished receiving {filename} from {address}")
     client_socket.close()
+
+
+def find_csv(directory):
+    # Loop through all the directories and files in the specified directory
+    for file in os.listdir(directory):
+            if file.endswith('.csv'):
+                # Return the full path of the first .xml file found
+                return os.path.join(directory, file)
+    return None  # If no .xml file is found
 
 def get_local_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -87,6 +122,9 @@ def get_local_ip():
     return ip
 
 if __name__ == "__main__":
+    file = "RESOURCES.csv"
+
+    load_data_from_csv(file)
     # device's IP address
     SERVER_HOST = get_local_ip()
     SERVER_PORT = 5001

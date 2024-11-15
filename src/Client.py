@@ -60,8 +60,11 @@ if(response != 'Login Failed'):
     status = ""
     while status != "exit":
         fileName = input("What file would you like to send?")
-        send_file(fileName)
+        if not os.path.isfile(fileName):
+            print(f"File '{fileName}' not found.")
+        else:
+            send_file(fileName)
         status = input("Press enter to continue or type 'exit' to exit")
 else:
-    print(response, "\nConnection closed");
-    s.close();
+    print(response, "\nConnection closed")
+    s.close()
