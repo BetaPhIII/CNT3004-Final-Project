@@ -105,44 +105,4 @@ def find_csv(directory):
     # Loop through all the directories and files in the specified directory
     for file in os.listdir(directory):
             if file.endswith('.csv'):
-                # Return the full path of the first .xml file found
-                return os.path.join(directory, file)
-    return None  # If no .xml file is found
-
-def get_local_ip():
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    try:
-        # This doesn't need to connect, but it sets the correct address
-        s.connect(("8.8.8.8", 80))  # Use Google's public DNS server to determine your network address
-        ip = s.getsockname()[0]
-    except Exception as e:
-        ip = "127.0.0.1"  # Fallback to localhost in case of any error
-    finally:
-        s.close()
-    return ip
-
-if __name__ == "__main__":
-    file = "RESOURCES.csv"
-
-    load_data_from_csv(file)
-    # device's IP address
-    SERVER_HOST = get_local_ip()
-    SERVER_PORT = 5001
-    # receive 4096 bytes each time
-    BUFFER_SIZE = 4096
-    SEPARATOR = "<SEPARATOR>"
-
-    # create the server socket
-    s = socket.socket()
-    # bind the socket to our local address
-    s.bind((SERVER_HOST, SERVER_PORT))
-    # enabling the server to accept connections
-    s.listen(5)
-    print(f"[*] Listening as {SERVER_HOST}:{SERVER_PORT}")
-
-    # keep server running to accept multiple connections
-    while True:
-        client_socket, address = s.accept()
-        # create a new thread for each client connection
-        thread = threading.Thread(target=process_handler, args=(client_socket, address))
-        thread.start()
+                # Return the 
