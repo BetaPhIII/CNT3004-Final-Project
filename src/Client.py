@@ -53,10 +53,15 @@ s.send(str.encode(password))
 # Receive response 
 response = s.recv(2048)
 response = response.decode()
-print(response)
-print("[+] Connected.")
-status = ""
-while status != "exit":
-    fileName = input("What file would you like to send?")
-    send_file(fileName)
-    status = input("Press enter to continue or type 'exit' to exit")
+if(response != 'Login Failed'):
+    print(response)
+    print("Welcome!") if (response == 'Registeration Successful') else print("Welcome back!")
+    print("[+] Connected.")
+    status = ""
+    while status != "exit":
+        fileName = input("What file would you like to send?")
+        send_file(fileName)
+        status = input("Press enter to continue or type 'exit' to exit")
+else:
+    print(response, "\nConnection closed");
+    s.close();
