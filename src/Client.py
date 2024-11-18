@@ -35,7 +35,8 @@ def send_file(filename):
     s.close()
 
 host = input("What IP would you like to connect to?")
-s = socket.socket()
+#ipv4 (AF_INET) socket object using the tcp protocol (SOCK_STREAM)
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print(f"[+] Connecting to {host}:{5001}")
 s.connect((host, 5001))
 response = s.recv(2048)
@@ -69,6 +70,7 @@ if(response != 'Login Failed'):
             else:
                 send_file(fileName)
         elif operation == "Download":
+<<<<<<< HEAD
             serverDir = s.recv()
             
 
@@ -80,6 +82,11 @@ if(response != 'Login Failed'):
         #         dirOp = input("Type 'View' to see the server directory, \ntype 'Make' to make a new directory, \nor type 'Delete' to remove a file or directory.")
         #         s.send(dirOp)
         status = input("\nPress enter to continue or type 'exit' to exit.\n")
+=======
+            pass
+        elif operation == "View":
+            status = input("\nPress enter to continue or type 'exit' to exit.\n")
+>>>>>>> 5a78264cec3f5e2584451686d09e30fe94b13ace
 else:
     print(response, "\nConnection closed")
     s.close()

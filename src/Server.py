@@ -26,7 +26,7 @@ def load_data_from_csv(file):
         except Exception as e:
             print(e, "Error creating csv file")
     return HashTable
-
+#to add credentials into csv file
 def add(file, key, value):
      with open(file, mode='a', newline='') as file:
         writer = csv.writer(file)
@@ -123,7 +123,7 @@ def get_local_ip():
 
 if __name__ == "__main__":
     file = "RESOURCES.csv"
-
+    #load previous usernames and passwords
     load_data_from_csv(file)
     # device's IP address
     SERVER_HOST = get_local_ip()
@@ -133,7 +133,8 @@ if __name__ == "__main__":
     SEPARATOR = "<SEPARATOR>"
 
     # create the server socket
-    s = socket.socket()
+    #ipv4 (AF_INET) socket object using the tcp protocol (SOCK_STREAM)
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # bind the socket to our local address
     s.bind((SERVER_HOST, SERVER_PORT))
     # enabling the server to accept connections
