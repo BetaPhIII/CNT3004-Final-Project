@@ -68,9 +68,9 @@ if(response != 'Login Failed'):
             else:
                 send_file(fileName)
         elif operation == "Download":
-
+            pass
         elif operation == "View":
-        status = input("\nPress enter to continue or type 'exit' to exit.\n")
+            status = input("\nPress enter to continue or type 'exit' to exit.\n")
 else:
     print(response, "\nConnection closed")
     s.close()
