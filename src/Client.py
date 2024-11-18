@@ -35,7 +35,8 @@ def send_file(filename):
     s.close()
 
 host = input("What IP would you like to connect to?")
-s = socket.socket()
+#ipv4 (AF_INET) socket object using the tcp protocol (SOCK_STREAM)
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print(f"[+] Connecting to {host}:{5001}")
 s.connect((host, 5001))
 response = s.recv(2048)
