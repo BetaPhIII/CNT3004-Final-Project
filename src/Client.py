@@ -60,8 +60,8 @@ if(response != 'Login Failed'):
     print("[+] Connected.")
     status = ""
     while status != "exit":
-        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nor type 'Dir' to view directory operations.")
-        s.send(operation)
+        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nor type 'Dir' to view directory operations.\n")
+        s.send(str.encode(operation))
         if operation == "Send":
             print(os.listdir())
             fileName = input("What file would you like to send? \n")
@@ -70,23 +70,9 @@ if(response != 'Login Failed'):
             else:
                 send_file(fileName)
         elif operation == "Download":
-<<<<<<< HEAD
-            serverDir = s.recv()
-            
-
-
-        
-        # elif operation == "Download":
-        #         print()
-        # elif operation == "Dir":
-        #         dirOp = input("Type 'View' to see the server directory, \ntype 'Make' to make a new directory, \nor type 'Delete' to remove a file or directory.")
-        #         s.send(dirOp)
-        status = input("\nPress enter to continue or type 'exit' to exit.\n")
-=======
-            pass
-        elif operation == "View":
-            status = input("\nPress enter to continue or type 'exit' to exit.\n")
->>>>>>> 5a78264cec3f5e2584451686d09e30fe94b13ace
+            print(response)
+        # elif operation == "View":
+        #     status = input("\nPress enter to continue or type 'exit' to exit.\n")
 else:
     print(response, "\nConnection closed")
     s.close()

@@ -101,8 +101,21 @@ def process_handler(client_socket, address):
             client_socket.close()
             return
     print(f"[+] {address} is connected.")
+
+    client_socket.send(str.encode('Enter command: ')) # Request command
+    operation = client_socket.recv(2048)
     
-    server_receive(client_socket,address)
+    if operation == "Send":
+        server_receive(client_socket,address)
+    elif operation == "Download":
+        print("test print")
+        listdir = os.listdir()
+        client_socket.send(str.encode(f'{listdir}'))
+    elif operation == "Mkdir":
+        client_socket.send(str.encode('Enter directory name: ')) # Request command
+        dir = client_socket.recv(2048)
+        os.mkdir(dir)
+        
 
 def find_csv(directory):
     # Loop through all the directories and files in the specified directory
