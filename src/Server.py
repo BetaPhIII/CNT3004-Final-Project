@@ -32,39 +32,7 @@ def add(file, key, value):
         writer = csv.writer(file)
         writer.writerow([key, value])
 
-def process_handler(client_socket, address):
-    client_socket.send(str.encode('ENTER USERNAME : ')) # Request Username
-    name = client_socket.recv(2048)
-    client_socket.send(str.encode('ENTER PASSWORD : ')) # Request Password
-    password = client_socket.recv(2048)
-    password = password.decode()
-    name = name.decode()
-    password=hashlib.sha256(str.encode(password)).hexdigest() # Password hash using SHA256
-# REGISTERATION PHASE   
-# If new user,  regiter in Hashtable Dictionary  
-    if name not in HashTable:
-        HashTable[name] = password
-        add("RESOURCES.csv", name, password)
-        client_socket.send(str.encode('Registeration Successful')) 
-        print('Registered : ',name)
-        print("{:<8} {:<20}".format('USER','PASSWORD'))
-        for k, v in HashTable.items():
-            label, num = k,v
-            print("{:<8} {:<20}".format(label, num))
-        print("-------------------------------------------")
-        
-    else:
-# If already existing user, check if the entered password is correct
-        if(HashTable[name] == password):
-            client_socket.send(str.encode('Connection Successful')) # Response Code for Connected Client 
-            print('Connected : ',name)
-        else:
-            client_socket.send(str.encode('Login Failed')) # Response code for login failed
-            print('Connection denied : ',name)
-            client_socket.close()
-            return
-    print(f"[+] {address} is connected.")
-
+def server_receive(client_socket, address):
     # receive and parse file metadata
     received = b""
     while SEPARATOR.encode() not in received:
@@ -100,6 +68,41 @@ def process_handler(client_socket, address):
     print(f"[+] Finished receiving {filename} from {address}")
     client_socket.close()
 
+
+def process_handler(client_socket, address):
+    client_socket.send(str.encode('ENTER USERNAME : ')) # Request Username
+    name = client_socket.recv(2048)
+    client_socket.send(str.encode('ENTER PASSWORD : ')) # Request Password
+    password = client_socket.recv(2048)
+    password = password.decode()
+    name = name.decode()
+    password=hashlib.sha256(str.encode(password)).hexdigest() # Password hash using SHA256
+# REGISTERATION PHASE   
+# If new user,  regiter in Hashtable Dictionary  
+    if name not in HashTable:
+        HashTable[name] = password
+        add("RESOURCES.csv", name, password)
+        client_socket.send(str.encode('Registeration Successful')) 
+        print('Registered : ',name)
+        print("{:<8} {:<20}".format('USER','PASSWORD'))
+        for k, v in HashTable.items():
+            label, num = k,v
+            print("{:<8} {:<20}".format(label, num))
+        print("-------------------------------------------")
+        
+    else:
+# If already existing user, check if the entered password is correct
+        if(HashTable[name] == password):
+            client_socket.send(str.encode('Connection Successful')) # Response Code for Connected Client 
+            print('Connected : ',name)
+        else:
+            client_socket.send(str.encode('Login Failed')) # Response code for login failed
+            print('Connection denied : ',name)
+            client_socket.close()
+            return
+    print(f"[+] {address} is connected.")
+    
+    server_receive(client_socket,address)
 
 def find_csv(directory):
     # Loop through all the directories and files in the specified directory
