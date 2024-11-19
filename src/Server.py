@@ -102,13 +102,12 @@ def process_handler(client_socket, address):
             return
     print(f"[+] {address} is connected.")
 
-    client_socket.send(str.encode('Enter command: ')) # Request command
     operation = client_socket.recv(2048)
+    operation = operation.decode()
     
     if operation == "Send":
         server_receive(client_socket,address)
     elif operation == "Download":
-        print("test print")
         listdir = os.listdir()
         client_socket.send(str.encode(f'{listdir}'))
     elif operation == "Mkdir":

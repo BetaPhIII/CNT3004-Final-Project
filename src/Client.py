@@ -70,6 +70,7 @@ if(response != 'Login Failed'):
             else:
                 send_file(fileName)
         elif operation == "Download":
+            response = s.recv(2048)
             print(response)
         # elif operation == "View":
         #     status = input("\nPress enter to continue or type 'exit' to exit.\n")
