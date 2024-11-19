@@ -48,7 +48,13 @@ def server_receive(client_socket, name):
         print(f"Error while decoding metadata: {e}")
         client_socket.close()
         return
-
+    
+    if os.path.isfile(filename):
+        client_socket.send(f"{os.path.getsize(filename)}".encode())
+        print(f"The file '{filename}' already exists in the current directory.")
+    else:
+        client_socket.send("False".encode())
+        print(f"The file '{filename}' does not exist in the current directory.")
     # remove absolute path if there is
     filename = os.path.basename(filename)
 

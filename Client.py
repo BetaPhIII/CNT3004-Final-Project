@@ -18,6 +18,13 @@ def send_file(filename):
     # send the file-name and file-size
     s.send(f"{filename}{SEPARATOR}{filesize}".encode())
 
+    response = s.recv(2048)
+    response = response.decode()
+
+    if response.isdigit():
+        print(f"File already exists in host: {host}. Would you like to overwrite the existing file? \n ")
+        print(f"Client side: {filename}\t{os.path.getsize(filename)}\t\tServer side: {filename}\t{response}")
+        choice = input("(Y/N)")
     # start sending the file
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "rb") as f:
@@ -83,6 +90,30 @@ def download_file():
 
     print(f"[+] File received from {host}")
 
+def print_dir(directory, prefix=""):
+    # List all entries in the directory
+    entries = [e for e in os.listdir(directory) if not e.startswith('.')]    
+    entries.sort()  # Sort entries for consistent output
+
+    # Separate files and directories
+    files = [f for f in entries if os.path.isfile(os.path.join(directory, f))]
+    dirs = [d for d in entries if os.path.isdir(os.path.join(directory, d))]
+
+    # Print directories first
+    for idx, d in enumerate(dirs):
+        # Check if it's the last directory
+        is_last = idx == len(dirs) - 1 and not files
+        new_prefix = prefix + (" ┗ " if is_last else " ┣ ")
+        print(f"{new_prefix}{d}")
+        # Recursively print the subdirectory
+        print_dir(os.path.join(directory, d), prefix + ("   " if is_last else " ┃ "))
+
+    # Print files
+    for idx, f in enumerate(files):
+        is_last = idx == len(files) - 1
+        file_prefix = prefix + (" ┗ " if is_last else " ┣ ")
+        print(f"{file_prefix}{f}")
+
     
 
 host = input("What IP would you like to connect to?")
@@ -120,7 +151,10 @@ if(response != 'Login Failed'):
         operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nor type 'Dir' to view directory operations.\n")
         s.send(str.encode(operation))
         if operation == "Send":
-            print(os.listdir())
+            root_directory = os.getcwd()  # Dynamically get the current working directory
+            root_name = os.path.basename(root_directory) or root_directory
+            print(root_name)
+            print_dir(root_directory)
             fileName = input("What file would you like to send? \n")
             send_file(fileName)
         elif operation == "Download":
