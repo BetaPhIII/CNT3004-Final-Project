@@ -32,7 +32,7 @@ def add(file, key, value):
         writer = csv.writer(file)
         writer.writerow([key, value])
 
-def server_receive(client_socket, address):
+def server_receive(client_socket, name):
     # receive and parse file metadata
     received = b""
     while SEPARATOR.encode() not in received:
@@ -64,10 +64,36 @@ def server_receive(client_socket, address):
             f.write(bytes_read)
             bytes_received += len(bytes_read)
             progress.update(len(bytes_read))
+    
+    print(f"[+] Finished receiving {filename} from {cip}: {name}")
 
-    print(f"[+] Finished receiving {filename} from {address}")
-    client_socket.close()
+def server_download(client_socket, filename, name):
+    if not os.path.isfile(filename):
+        client_socket.send("File not found".encode())
+        return
+    client_socket.send("File found".encode())
 
+    filesize = os.path.getsize(filename)
+
+    # send the file-name and file-size
+    client_socket.send(f"{os.path.basename(filename)}{SEPARATOR}{filesize}".encode())
+
+    # start sending the file
+
+
+    
+    progress = tqdm.tqdm(total=filesize, desc=f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    with open(filename, "rb") as f:
+        while True:
+            # read the bytes from the file
+            bytes_read = f.read(BUFFER_SIZE)
+            if not bytes_read:
+                # file transmitting is done
+                break
+            # we use sendall to assure transmission in busy networks
+            client_socket.sendall(bytes_read)
+            progress.update(len(bytes_read))  # Update progress
+    print(f"[+] Finished sending {filename} to {cip}: {name}")
 
 def process_handler(client_socket, address):
     client_socket.send(str.encode('ENTER USERNAME : ')) # Request Username
@@ -100,20 +126,32 @@ def process_handler(client_socket, address):
             print('Connection denied : ',name)
             client_socket.close()
             return
-    print(f"[+] {address} is connected.")
-
-    operation = client_socket.recv(2048)
-    operation = operation.decode()
+    print(f"[+] {cip}: {name} is connected.")
     
-    if operation == "Send":
-        server_receive(client_socket,address)
-    elif operation == "Download":
-        listdir = os.listdir()
-        client_socket.send(str.encode(f'{listdir}'))
-    elif operation == "Mkdir":
-        client_socket.send(str.encode('Enter directory name: ')) # Request command
-        dir = client_socket.recv(2048)
-        os.mkdir(dir)
+    while True:
+        operation = client_socket.recv(2048)
+        operation = operation.decode()
+        
+        if operation == "Send":
+            server_receive(client_socket,name)
+        elif operation == "Download":
+            #getting directory of server
+            listdir = os.listdir()
+            #sending it to client to choose a file
+            client_socket.send(str.encode(f'{listdir}'))
+            #getting user choice
+            filename = client_socket.recv(2048)
+            filename = filename.decode()
+            server_download(client_socket, filename, name)
+
+        elif operation == "Mkdir":
+            client_socket.send(str.encode('Enter directory name: ')) # Request command
+            dir = client_socket.recv(2048)
+            os.mkdir(dir)
+        elif operation == "exit":
+            print(f"[+] {address[1]}: {name} disconnected.")
+            client_socket.close()
+            break
         
 
 def find_csv(directory):
@@ -159,6 +197,8 @@ if __name__ == "__main__":
     # keep server running to accept multiple connections
     while True:
         client_socket, address = s.accept()
+        global cip
+        cip = address[1]
         # create a new thread for each client connection
         thread = threading.Thread(target=process_handler, args=(client_socket, address))
         thread.start()
