@@ -108,7 +108,7 @@ def server_download(client_socket, filename, name):
     print(f"[+] Finished sending {filename} to {cip}: {name}")
 
 def print_dir(directory, prefix=""):
-    dir = ""
+    dir = "\n"
     # List all entries in the directory
     entries = [e for e in os.listdir(directory) if not e.startswith('.')]    
     entries.sort()  # Sort entries for consistent output
@@ -122,7 +122,7 @@ def print_dir(directory, prefix=""):
         # Check if it's the last directory
         is_last = idx == len(dirs) - 1 and not files
         new_prefix = prefix + (" ┗ " if is_last else " ┣ ")
-        dir += f"{new_prefix}{d}"
+        dir += f"{new_prefix}{d}\n"
         # Recursively print the subdirectory
         print_dir(os.path.join(directory, d), prefix + ("   " if is_last else " ┃ "))
 
@@ -130,7 +130,7 @@ def print_dir(directory, prefix=""):
     for idx, f in enumerate(files):
         is_last = idx == len(files) - 1
         file_prefix = prefix + (" ┗ " if is_last else " ┣ ")
-        dir += f"{file_prefix}{f}"
+        dir += f"{file_prefix}{f}\n"
     
     return dir
 
@@ -146,7 +146,7 @@ def process_handler(client_socket, address):
 # If new user,  regiter in Hashtable Dictionary  
     if name not in HashTable:
         HashTable[name] = password
-        add("RESOURCES.csv", name, password)
+        add(".RESOURCES.csv", name, password)
         client_socket.send(str.encode('Registeration Successful')) 
         print('Registered : ',name)
         print("{:<8} {:<20}".format('USER','PASSWORD'))
@@ -218,7 +218,7 @@ def get_local_ip():
     return ip
 
 if __name__ == "__main__":
-    file = "RESOURCES.csv"
+    file = ".RESOURCES.csv"
     #load previous usernames and passwords
     load_data_from_csv(file)
     # device's IP address
