@@ -98,6 +98,44 @@ def download_file():
 
     print(f"[+] File received from {host}")
 
+def delete_file():
+    #recieving the directory of the server
+    response = s.recv(2048)
+    response = response.decode()
+    print(response)#printing it 
+
+    #prompting the user for the filename wanted
+    filename = input("What file would you like to delete? \n")
+
+    # if response.find(filename):
+
+    #telling the server the filename
+    s.send(f"{filename}".encode())
+
+    response = s.recv(2048)
+    response = response.decode()
+    if(response[0] == "0"):
+        print(response[1:])
+    elif(response[0] == "1"):
+        print(response[1:])
+    elif(response[0] == "2"):
+        print(response[1:])
+    else:
+        print(response[1:])
+    #Types of responses
+''' Response : Status of Connection :
+    0 : File deleted
+    1 : File not found
+    2 : File is being processed
+# '''
+
+def server_directory():
+    #recieving the directory of the server
+    response = s.recv(2048)
+    response = response.decode()
+    print(response)#printing it 
+    return response
+
 def print_dir(directory, prefix=""):
     # List all entries in the directory
     entries = [e for e in os.listdir(directory) if not e.startswith('.')]    
@@ -156,7 +194,7 @@ if(response != 'Login Failed'):
     print("[+] Connected.")
     operation = ""
     while operation != "exit":
-        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nor type 'Dir' to view directory operations.\n")
+        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nType 'Delete' to delete a file from the server, \nor type 'Dir' to view directory operations.\n")
         s.send(str.encode(operation))
         if operation == "Send":
             root_directory = os.getcwd()  # Dynamically get the current working directory
@@ -167,6 +205,10 @@ if(response != 'Login Failed'):
             send_file(fileName)
         elif operation == "Download":
             download_file()
+        elif operation == "Delete":
+            delete_file()
+        elif operation == "Dir":
+            server_directory()
         elif operation == "exit":
             s.send("exit".encode())
             

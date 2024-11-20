@@ -107,6 +107,21 @@ def server_download(client_socket, filename, name):
             progress.update(len(bytes_read))  # Update progress
     print(f"[+] Finished sending {filename} to {cip}: {name}")
 
+def server_delete(client_socket, filename, name):
+    try:
+        os.remove(filename)
+        client_socket.send(f"0File '{filename}' has been deleted.".encode())
+        print("Deletion requested from {name} successful.")
+    except FileNotFoundError:
+        client_socket.send(f"1File '{filename}' not found.".encode())
+        print("Deletion requested from {name} unsuccessful.")
+    except PermissionError:
+        client_socket.send(f"2Permission denied: '{filename}'".encode())
+        print("Permition denied for deletion request from {name}.")
+    except Exception as e:
+        client_socket.send(f"3Error occurred while deleting the file: {e}'".encode())
+        print(f"Error: {e}, ocurred while servicing delete request from {name}.")
+
 def print_dir(directory, prefix=""):
     dir = "\n"
     # List all entries in the directory
@@ -173,19 +188,22 @@ def process_handler(client_socket, address):
         
         if operation == "Send":
             server_receive(client_socket,name)
-        elif operation == "Download":
+        elif operation == "Download" or operation == "Delete" or operation == "Dir":
             #getting directory of server
             root_directory = os.getcwd()  # Dynamically get the current working directory
             root_name = os.path.basename(root_directory) or root_directory
             dir = root_name
             dir += print_dir(root_directory)
-            
             #sending it to client to choose a file
             client_socket.send(str.encode(f'{dir}'))
-            #getting user choice
-            filename = client_socket.recv(2048)
-            filename = filename.decode()
-            server_download(client_socket, filename, name)
+            if operation == "Download" or operation == "Delete":
+                #getting user choice
+                filename = client_socket.recv(2048)
+                filename = filename.decode()
+                if operation == "Download":
+                    server_download(client_socket, filename, name)
+                else:
+                    server_delete(client_socket, filename, name)
 
         elif operation == "Mkdir":
             client_socket.send(str.encode('Enter directory name: ')) # Request command
