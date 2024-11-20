@@ -52,6 +52,12 @@ def server_receive(client_socket, name):
     if os.path.isfile(filename):
         client_socket.send(f"{os.path.getsize(filename)}".encode())
         print(f"The file '{filename}' already exists in the current directory.")
+        response = client_socket.recv(2048)
+        response = response.decode()
+        if response == "N":
+            return
+        elif response == "Y":
+            print("Overwriting")
     else:
         client_socket.send("False".encode())
         print(f"The file '{filename}' does not exist in the current directory.")
@@ -101,6 +107,33 @@ def server_download(client_socket, filename, name):
             progress.update(len(bytes_read))  # Update progress
     print(f"[+] Finished sending {filename} to {cip}: {name}")
 
+def print_dir(directory, prefix=""):
+    dir = ""
+    # List all entries in the directory
+    entries = [e for e in os.listdir(directory) if not e.startswith('.')]    
+    entries.sort()  # Sort entries for consistent output
+
+    # Separate files and directories
+    files = [f for f in entries if os.path.isfile(os.path.join(directory, f))]
+    dirs = [d for d in entries if os.path.isdir(os.path.join(directory, d))]
+
+    # Print directories first
+    for idx, d in enumerate(dirs):
+        # Check if it's the last directory
+        is_last = idx == len(dirs) - 1 and not files
+        new_prefix = prefix + (" ┗ " if is_last else " ┣ ")
+        dir += f"{new_prefix}{d}"
+        # Recursively print the subdirectory
+        print_dir(os.path.join(directory, d), prefix + ("   " if is_last else " ┃ "))
+
+    # Print files
+    for idx, f in enumerate(files):
+        is_last = idx == len(files) - 1
+        file_prefix = prefix + (" ┗ " if is_last else " ┣ ")
+        dir += f"{file_prefix}{f}"
+    
+    return dir
+
 def process_handler(client_socket, address):
     client_socket.send(str.encode('ENTER USERNAME : ')) # Request Username
     name = client_socket.recv(2048)
@@ -142,9 +175,13 @@ def process_handler(client_socket, address):
             server_receive(client_socket,name)
         elif operation == "Download":
             #getting directory of server
-            listdir = os.listdir()
+            root_directory = os.getcwd()  # Dynamically get the current working directory
+            root_name = os.path.basename(root_directory) or root_directory
+            dir = root_name
+            dir += print_dir(root_directory)
+            
             #sending it to client to choose a file
-            client_socket.send(str.encode(f'{listdir}'))
+            client_socket.send(str.encode(f'{dir}'))
             #getting user choice
             filename = client_socket.recv(2048)
             filename = filename.decode()

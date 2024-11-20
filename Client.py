@@ -25,6 +25,14 @@ def send_file(filename):
         print(f"File already exists in host: {host}. Would you like to overwrite the existing file? \n ")
         print(f"Client side: {filename}\t{os.path.getsize(filename)}\t\tServer side: {filename}\t{response}")
         choice = input("(Y/N)")
+        if choice == "Y":
+            print("Overwriting file...")
+            s.send(choice.encode())
+        elif choice == "N":
+            s.send(choice.encode())
+            return
+        else:
+            print("Did not quite catch that...")
     # start sending the file
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "rb") as f:
