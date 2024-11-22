@@ -206,9 +206,11 @@ def process_handler(client_socket, address):
                     server_delete(client_socket, filename, name)
 
         elif operation == "Mkdir":
-            client_socket.send(str.encode('Enter directory name: ')) # Request command
             dir = client_socket.recv(2048)
+            dir = dir.decode()
             os.mkdir(dir)
+            client_socket.send(str.encode(f'Successfully created directory {dir}'))
+            
         elif operation == "exit":
             print(f"[+] {address[1]}: {name} disconnected.")
             client_socket.close()
