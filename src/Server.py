@@ -205,12 +205,23 @@ def process_handler(client_socket, address):
                 else:
                     server_delete(client_socket, filename, name)
 
-        elif operation == "Mkdir":
-            dir = client_socket.recv(2048)
-            dir = dir.decode()
-            os.mkdir(dir)
-            client_socket.send(str.encode(f'Successfully created directory {dir}'))
-            
+        elif operation == "Subfolder":
+            choice = client_socket.recv(2048)
+            choice = choice.decode()
+            while True:
+                if choice == "create":
+                    dir = client_socket.recv(2048)
+                    dir = dir.decode()
+                    os.mkdir(dir)
+                    client_socket.send(str.encode(f'Successfully created directory {dir}'))
+                    break
+                elif choice == "delete":
+                    dir = client_socket.recv(2048)
+                    dir = dir.decode()
+                    os.rmdir(dir)
+                    client_socket.send(str.encode(f'Successfully removed directory {dir}'))
+                    break
+
         elif operation == "exit":
             print(f"[+] {address[1]}: {name} disconnected.")
             client_socket.close()

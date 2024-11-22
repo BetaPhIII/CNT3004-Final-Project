@@ -8,7 +8,9 @@ import os
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 1024 * 4 #4KB
 
-def create_file():
+def create_directory():
+    choice = input("Create or delete file (type \"create\" or \"delete\"):")
+    s.send(f"{choice}".encode())
     dir_name = input("Directory name: ")
     s.send(f"{dir_name}".encode())
     response = s.recv(2048)
@@ -201,7 +203,7 @@ if(response != 'Login Failed'):
     print("[+] Connected.")
     operation = ""
     while operation != "exit":
-        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nType 'Delete' to delete a file from the server, \nor type 'Dir' to view directory operations, \nType 'Mkdir' to create a directory in the server.\n")
+        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nType 'Delete' to delete a file from the server, \nType 'Dir' to view directory operations, \nType 'Subfolder' to create or delete a directory in the server, \nType 'exit' to exit the program")
         s.send(str.encode(operation))
         if operation == "Send":
             root_directory = os.getcwd()  # Dynamically get the current working directory
@@ -216,7 +218,7 @@ if(response != 'Login Failed'):
             delete_file()
         elif operation == "Dir":
             server_directory()
-        elif operation == "Mkdir":
+        elif operation == "Subfolder":
             create_directory()
         elif operation == "exit":
             s.send("exit".encode())
