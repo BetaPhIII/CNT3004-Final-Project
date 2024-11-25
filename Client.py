@@ -11,7 +11,7 @@ SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 1024 * 4 #4KB
 
 def create_directory():
-    choice = input("Create or delete file (type \"create\" or \"delete\"):")
+    choice = input("Create or delete file (type \"create\" or \"delete\"): ")
     s.send(f"{choice}".encode())
     dir_name = input("Directory name: ")
     s.send(f"{dir_name}".encode())
@@ -37,7 +37,7 @@ def send_file(filename):
     if response.isdigit():
         print(f"File already exists in host: {host}. Would you like to overwrite the existing file? \n ")
         print(f"Client side: {filename}\t{os.path.getsize(filename)}\t\tServer side: {filename}\t{response}")
-        choice = input("(Y/N)")
+        choice = input("(Y/N)\n")
         if choice == "Y":
             print("Overwriting file...")
             s.send(choice.encode())
@@ -73,7 +73,7 @@ def download_file():
 
     while True:
         #prompting the user for the filename wanted
-        filename = input("What file would you like to download? \n")
+        filename = input("Enter the filename to download: ")
         if filename == ".RESOURCES.csv":
             print("Operation not permitted")
         else:
@@ -127,7 +127,7 @@ def delete_file():
 
     #prompting the user for the filename wanted
     while True:
-        filename = input("What file would you like to delete? \n")
+        filename = input("Enter the filename to delete: ")
         if filename == "Server.py" or filename == "../Client.py" or filename == ".RESOURCES.csv":
             print("Operation not permitted")
         else:
@@ -223,14 +223,14 @@ if(response != 'Login Failed'):
     print("[+] Connected.")
     operation = ""
     while operation != "exit":
-        operation = input("Choose an operation (Send, Download, Delete, Dir, Subfolder, exit): ").strip().lower()
+        operation = input("Choose an operation (Send, Download, Delete, Dir, Subfolder, Help, Exit): ").strip().lower()
         s.send(str.encode(operation))
         if operation == "send":
             root_directory = os.getcwd()  # Dynamically get the current working directory
             root_name = os.path.basename(root_directory) or root_directory
             print(root_name)
             print_dir(root_directory)
-            fileName = input("What file would you like to send? \n")
+            fileName = input("Enter the file name to upload: ")
             send_file(fileName)
             print(f"[+] File sent to {host}")
         elif operation == "download":
@@ -242,6 +242,13 @@ if(response != 'Login Failed'):
             server_directory()
         elif operation == "subfolder":
             create_directory()
+        elif operation == "help":
+            print("Welcome to help!")
+            print("Send: upload a file to the file sharing server.")
+            print("Download: download a file from the server.")
+            print("Delete: delete a file from the server.")
+            print("Dir: view a list of files and subdirectories in the server's file storage path.")
+            print("Subfolder: create folders or subfolders in the server's file storage path")
         elif operation == "exit":
             s.close()
 
