@@ -64,7 +64,6 @@ def send_file(filename):
 
     Analysis.getSpeed(filesize, t)
 
-    print(f"[+] File sent to {host}")
 
 def download_file():
     #recieving the directory of the server
@@ -119,8 +118,6 @@ def download_file():
             f.write(bytes_read)
             bytes_received += len(bytes_read)
             progress.update(len(bytes_read))
-
-    print(f"[+] File received from {host}")
 
 def delete_file():
     #recieving the directory of the server
@@ -189,7 +186,28 @@ def print_dir(directory, prefix=""):
         file_prefix = prefix + (" ┗ " if is_last else " ┣ ")
         print(f"{file_prefix}{f}")
 
-    
+def login(s):
+    #Authentication section
+    response = s.recv(2048) #ENTER USERNAME : 
+    #Get user name
+    name = input(response.decode())	
+    #Send username to server
+    s.send(str.encode(name)) 
+    response = s.recv(2048)#ENTER PASSWORD :
+    # Input Password
+    password = input(response.decode())
+    #send password to server
+    s.send(str.encode(password))
+    #Types of responses
+    ''' Response : Status of Connection :
+        1 : Registeration successful 
+        2 : Connection Successful
+        3 : Login Failed
+    '''
+    # Receive response 
+    response = s.recv(2048)
+    response = response.decode()
+    return response
 
 host = input("What IP would you like to connect to?")
 #ipv4 (AF_INET) socket object using the tcp protocol (SOCK_STREAM)
@@ -197,54 +215,35 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print(f"[+] Connecting to {host}:{5001}")
 s.connect((host, 5001))
 
-#Authentication section
-response = s.recv(2048) #ENTER USERNAME : 
-#Get user name
-name = input(response.decode())	
-#Send username to server
-s.send(str.encode(name)) 
-response = s.recv(2048)#ENTER PASSWORD :
-# Input Password
-password = input(response.decode())
-#send password to server
-s.send(str.encode(password))
-#Types of responses
-''' Response : Status of Connection :
-    1 : Registeration successful 
-    2 : Connection Successful
-    3 : Login Failed
-'''
-# Receive response 
-response = s.recv(2048)
-response = response.decode()
+response = login(s)
+
 if(response != 'Login Failed'):
     print(response)
     print("Welcome!") if (response == 'Registeration Successful') else print("Welcome back!")
     print("[+] Connected.")
     operation = ""
     while operation != "exit":
-        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nType 'Delete' to delete a file from the server, \nType 'Dir' to view directory operations, \nType 'Subfolder' to create or delete a directory in the server, \nType 'exit' to exit the program\n")
+        operation = input("Choose an operation (Send, Download, Delete, Dir, Subfolder, exit): ").strip().lower()
         s.send(str.encode(operation))
-        if operation == "Send":
+        if operation == "send":
             root_directory = os.getcwd()  # Dynamically get the current working directory
             root_name = os.path.basename(root_directory) or root_directory
             print(root_name)
             print_dir(root_directory)
             fileName = input("What file would you like to send? \n")
             send_file(fileName)
-        elif operation == "Download":
+            print(f"[+] File sent to {host}")
+        elif operation == "download":
             download_file()
-        elif operation == "Delete":
+            print(f"[+] File received from {host}")
+        elif operation == "delete":
             delete_file()
-        elif operation == "Dir":
+        elif operation == "dir":
             server_directory()
-        elif operation == "Subfolder":
+        elif operation == "subfolder":
             create_directory()
         elif operation == "exit":
-            s.send("exit".encode())
-            
-        # elif operation == "View":
-        #     status = input("\nPress enter to continue or type 'exit' to exit.\n")
+            s.close()
 
 else:
     print(response, "\nConnection closed")

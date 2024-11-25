@@ -77,8 +77,6 @@ def server_receive(client_socket, name):
             bytes_received += len(bytes_read)
             progress.update(len(bytes_read))
     
-    print(f"[+] Finished receiving {filename} from {cip}: {name}")
-
 def server_download(client_socket, filename, name):
     if not os.path.isfile(filename):
         client_socket.send("File not found".encode())
@@ -105,7 +103,6 @@ def server_download(client_socket, filename, name):
             # we use sendall to assure transmission in busy networks
             client_socket.sendall(bytes_read)
             progress.update(len(bytes_read))  # Update progress
-    print(f"[+] Finished sending {filename} to {cip}: {name}")
 
 def server_delete(client_socket, filename, name):
     try:
@@ -149,7 +146,7 @@ def print_dir(directory, prefix=""):
     
     return dir
 
-def process_handler(client_socket, address):
+def login(s):
     client_socket.send(str.encode('ENTER USERNAME : ')) # Request Username
     name = client_socket.recv(2048)
     client_socket.send(str.encode('ENTER PASSWORD : ')) # Request Password
@@ -179,33 +176,41 @@ def process_handler(client_socket, address):
             client_socket.send(str.encode('Login Failed')) # Response code for login failed
             print('Connection denied : ',name)
             client_socket.close()
-            return
+            return 0
     print(f"[+] {cip}: {name} is connected.")
-    
-    while True:
+    return name
+
+
+def process_handler(client_socket, address):
+    name = login(client_socket)
+    while name:
         operation = client_socket.recv(2048)
         operation = operation.decode()
         
-        if operation == "Send":
+        if operation == "send":
             server_receive(client_socket,name)
-        elif operation == "Download" or operation == "Delete" or operation == "Dir":
+            print(f"[+] Finished receiving {filename} from {cip}: {name}")
+
+        elif operation == "download" or operation == "delete" or operation == "dir":
             #getting directory of server
             root_directory = os.getcwd()  # Dynamically get the current working directory
             root_name = os.path.basename(root_directory) or root_directory
             dir = root_name
             dir += print_dir(root_directory)
+            print(dir)
             #sending it to client to choose a file
             client_socket.send(str.encode(f'{dir}'))
-            if operation == "Download" or operation == "Delete":
+            if operation == "download" or operation == "delete":
                 #getting user choice
                 filename = client_socket.recv(2048)
                 filename = filename.decode()
-                if operation == "Download":
+                if operation == "download":
                     server_download(client_socket, filename, name)
+                    print(f"[+] Finished sending {filename} to {cip}: {name}")
                 else:
                     server_delete(client_socket, filename, name)
 
-        elif operation == "Subfolder":
+        elif operation == "subfolder":
             choice = client_socket.recv(2048)
             choice = choice.decode()
             while True:
