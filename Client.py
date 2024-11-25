@@ -63,8 +63,14 @@ def download_file():
     response = response.decode()
     print(response)#printing it 
 
-    #prompting the user for the filename wanted
-    filename = input("What file would you like to download? \n")
+    while True:
+        #prompting the user for the filename wanted
+        filename = input("What file would you like to download? \n")
+        if filename == ".RESOURCES.csv":
+            print("Operation not permitted")
+        else:
+            break
+    
     #telling the server the filename
     s.send(f"{filename}".encode())
 
@@ -114,7 +120,12 @@ def delete_file():
     print(response)#printing it 
 
     #prompting the user for the filename wanted
-    filename = input("What file would you like to delete? \n")
+    while True:
+        filename = input("What file would you like to delete? \n")
+        if filename == "Server.py" or filename == "../Client.py" or filename == ".RESOURCES.csv":
+            print("Operation not permitted")
+        else:
+            break
 
     # if response.find(filename):
 
