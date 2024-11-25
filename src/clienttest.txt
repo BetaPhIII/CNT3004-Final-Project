@@ -1,0 +1,13 @@
+progress = tqdm.tqdm(total=filesize, desc=f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    with open(filename, "rb") as f:
+        while True:
+            # read the bytes from the file
+            bytes_read = f.read(BUFFER_SIZE)
+            if not bytes_read:
+                # file transmitting is done
+                break
+            # we use sendall to assure transmission in busy networks
+            client_socket.sendall(bytes_read)
+            progress.update(len(bytes_read))  # Update progress
+    progress.close()
+    print(f"[+] Finished sending {filename}")

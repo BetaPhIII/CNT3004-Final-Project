@@ -1,6 +1,12 @@
 # Analysis.py
 
-def getSpeed(size, time):
+import csv
+
+def initializeData():
+    with open('analysis.csv', 'w') as file:
+        file.write("Transfer Speed\n")
+
+def getData(size, time):
     speed = size / time
     if speed >= 10e9:
         speed = speed / 10e9
@@ -10,5 +16,9 @@ def getSpeed(size, time):
         unit = "MB/s"
     elif speed >= 10e3:
         speed = speed / 10e3
-        unit = "KB/s"
-    print("Data Speed: ", speed, " ", unit)
+        unit = "B/s"
+    else:
+        unit = "B/s"
+    with open('analysis.csv','a') as fd:
+        data = f'{round(speed,2)} {unit}\n'
+        fd.write(data)

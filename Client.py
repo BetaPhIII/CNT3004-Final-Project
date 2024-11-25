@@ -62,7 +62,7 @@ def send_file(filename):
     t2 = time.perf_counter()
     t = t2-t1
 
-    Analysis.getSpeed(filesize, t)
+    Analysis.getData(filesize, t)
 
 
 def download_file():
@@ -221,6 +221,7 @@ if(response != 'Login Failed'):
     print(response)
     print("Welcome!") if (response == 'Registeration Successful') else print("Welcome back!")
     print("[+] Connected.")
+    Analysis.initializeData()
     operation = ""
     while operation != "exit":
         operation = input("Choose an operation (Send, Download, Delete, Dir, Subfolder, Help, Exit): ").strip().lower()
