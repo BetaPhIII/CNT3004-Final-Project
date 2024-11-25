@@ -4,6 +4,8 @@ Client that sends the file (uploads)
 import socket
 import tqdm
 import os
+import Analysis
+import time
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 1024 * 4 #4KB
@@ -23,6 +25,8 @@ def send_file(filename):
         return
     # get the file size
     filesize = os.path.getsize(filename)
+
+    t1 = time.perf_counter()
 
     # send the file-name and file-size
     s.send(f"{filename}{SEPARATOR}{filesize}".encode())
@@ -55,6 +59,11 @@ def send_file(filename):
             s.sendall(bytes_read)
             # update the progress bar
             progress.update(len(bytes_read))
+    t2 = time.perf_counter()
+    t = t2-t1
+
+    Analysis.getSpeed(filesize, t)
+
     print(f"[+] File sent to {host}")
 
 def download_file():
@@ -214,7 +223,7 @@ if(response != 'Login Failed'):
     print("[+] Connected.")
     operation = ""
     while operation != "exit":
-        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nType 'Delete' to delete a file from the server, \nType 'Dir' to view directory operations, \nType 'Subfolder' to create or delete a directory in the server, \nType 'exit' to exit the program")
+        operation = input("Type 'Send' to send a file to the server, \nType 'Download' to download a file from the server, \nType 'Delete' to delete a file from the server, \nType 'Dir' to view directory operations, \nType 'Subfolder' to create or delete a directory in the server, \nType 'exit' to exit the program\n")
         s.send(str.encode(operation))
         if operation == "Send":
             root_directory = os.getcwd()  # Dynamically get the current working directory
