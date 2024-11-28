@@ -189,7 +189,7 @@ def process_handler(client_socket, address):
         
         if operation == "send":
             server_receive(client_socket,name)
-            print(f"[+] Finished receiving {filename} from {cip}: {name}")
+            print(f"[+] Finished receiving file from {cip}: {name}")
 
         elif operation == "download" or operation == "delete" or operation == "dir":
             #getting directory of server

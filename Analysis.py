@@ -1,13 +1,14 @@
-# Analysis.py
+import datetime
 
-import csv
-
-def initializeData():
-    with open('analysis.csv', 'w') as file:
-        file.write("Transfer Speed\n")
+def initializeData(socketTime):
+    # Writes the server response time at the top of the txt file
+    with open('analysis.txt', 'w') as file:
+        file.write(f'--------------------------\nSocket created in {round(socketTime * 10e3, 2)} ms\n--------------------------\n')
 
 def getData(size, time):
+    # Calculates the data transfer speed
     speed = size / time
+    # Converts the speed to appropriate unit
     if speed >= 10e9:
         speed = speed / 10e9
         unit = "GB/s"
@@ -19,6 +20,6 @@ def getData(size, time):
         unit = "B/s"
     else:
         unit = "B/s"
-    with open('analysis.csv','a') as fd:
-        data = f'{round(speed,2)} {unit}\n'
-        fd.write(data)
+    # Appends the speed and timestamp to the txt file
+    with open('analysis.txt','a') as fd:
+        fd.write(f'> Transfer Speed: {round(speed,2)} {unit}, Time Sent: {datetime.datetime.now()}\n')

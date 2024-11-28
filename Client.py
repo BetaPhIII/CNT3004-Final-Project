@@ -211,9 +211,14 @@ def login(s):
 
 host = input("What IP would you like to connect to?")
 #ipv4 (AF_INET) socket object using the tcp protocol (SOCK_STREAM)
+
+
+socketTime1 = time.perf_counter()
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 print(f"[+] Connecting to {host}:{5001}")
 s.connect((host, 5001))
+socketTime2 = time.perf_counter()
+socketTime = socketTime2 - socketTime1
 
 response = login(s)
 
@@ -221,7 +226,7 @@ if(response != 'Login Failed'):
     print(response)
     print("Welcome!") if (response == 'Registeration Successful') else print("Welcome back!")
     print("[+] Connected.")
-    Analysis.initializeData()
+    Analysis.initializeData(socketTime)
     operation = ""
     while operation != "exit":
         operation = input("Choose an operation (Send, Download, Delete, Dir, Subfolder, Help, Exit): ").strip().lower()
