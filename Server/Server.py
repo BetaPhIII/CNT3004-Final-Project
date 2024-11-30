@@ -268,7 +268,6 @@ def process_handler(client_socket, address):
             root_name = os.path.basename(root_directory) or root_directory
             dir = root_name + "\n"
             dir += print_dir(root_directory)
-            print(dir)
             #sending it to client to choose a file
             client_socket.send(str.encode(f'{dir}'))
             if operation == "download" or operation == "delete":
