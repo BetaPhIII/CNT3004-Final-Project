@@ -304,92 +304,93 @@ def login(s):
     response = response.decode()
     return response
 
-host = input("What IP would you like to connect to? ")
-#ipv4 (AF_INET) socket object using the tcp protocol (SOCK_STREAM)
+if __name__ == "__main__":
+    host = input("What IP would you like to connect to? ")
+    #ipv4 (AF_INET) socket object using the tcp protocol (SOCK_STREAM)
 
-# Time when the socket is created
-socketTime1 = time.perf_counter()
+    # Time when the socket is created
+    socketTime1 = time.perf_counter()
 
-# Creates and connects to the socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print(f"[+] Connecting to {host}:{5001}")
-s.connect((host, 5001))
+    # Creates and connects to the socket
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    print(f"[+] Connecting to {host}:{5001}")
+    s.connect((host, 5001))
 
-# Time when the socket is connected
-socketTime2 = time.perf_counter()
+    # Time when the socket is connected
+    socketTime2 = time.perf_counter()
 
-# Calculates the elapsed time
-socketTime = socketTime2 - socketTime1
+    # Calculates the elapsed time
+    socketTime = socketTime2 - socketTime1
 
-# Gets the login response from the server
-response = login(s)
+    # Gets the login response from the server
+    response = login(s)
 
-# If the user had a valid login or registration
-if(response != 'Login Failed'):
-    
-    # Prints the login response
-    print(response)
-    print("Welcome!") if (response == 'Registeration Successful') else print("Welcome back!")
-    print("[+] Connected.")
-    
-    # Adds the server response time to the analysis file
-    Analysis.initializeData(socketTime)
-    
-    operation = ""
-    while operation != "exit":
+    # If the user had a valid login or registration
+    if(response != 'Login Failed'):
         
-        # Prompts the user for the operation
-        operation = input("Choose an operation (Upload, Download, Delete, Dir, Subfolder, Help, Exit): ").strip().lower()
-        # Sends the operation to the server
-        s.send(str.encode(operation))
+        # Prints the login response
+        print(response)
+        print("Welcome!") if (response == 'Registeration Successful') else print("Welcome back!")
+        print("[+] Connected.")
         
-        # Uploads a file
-        if operation == "upload":
-            root_directory = os.getcwd()  # Dynamically get the current working directory
-            root_name = os.path.basename(root_directory) or root_directory
-            print(root_name)
-            print_dir(root_directory)
-            fileName = input("Enter the file name to upload: ")
-            if fileName.endswith(".mp4"):
-                print("Video file detected")
-            elif fileName.endswith(".mp3"):
-                print("Audio file detected")
-            elif fileName.endswith(".txt"):
-                print("Text file detected")
-            send_file(fileName)
-            print(f"[+] File sent to {host}")
+        # Adds the server response time to the analysis file
+        Analysis.initializeData(socketTime)
         
-        # Downloads a file
-        elif operation == "download":
-            download_file()
-            print(f"[+] File received from {host}")
-        
-        # Deletes a file
-        elif operation == "delete":
-            delete_file()
-        
-        # Prints the server directory
-        elif operation == "dir":
-            server_directory()
-        
-        # Handles subfolder operations
-        elif operation == "subfolder":
-            directory_op()
-        
-        # Prints the commands
-        elif operation == "help":
-            print("Welcome to help!")
-            print("Send: upload a file to the file sharing server.")
-            print("Download: download a file from the server.")
-            print("Delete: delete a file from the server.")
-            print("Dir: view a list of files and subdirectories in the server's file storage path.")
-            print("Subfolder: create folders or subfolders in the server's file storage path")
-        
-        # Exits the connection
-        elif operation == "exit":
-            s.close()
+        operation = ""
+        while operation != "exit":
+            
+            # Prompts the user for the operation
+            operation = input("Choose an operation (Upload, Download, Delete, Dir, Subfolder, Help, Exit): ").strip().lower()
+            # Sends the operation to the server
+            s.send(str.encode(operation))
+            
+            # Uploads a file
+            if operation == "upload":
+                root_directory = os.getcwd()  # Dynamically get the current working directory
+                root_name = os.path.basename(root_directory) or root_directory
+                print(root_name)
+                print_dir(root_directory)
+                fileName = input("Enter the file name to upload: ")
+                if fileName.endswith(".mp4"):
+                    print("Video file detected")
+                elif fileName.endswith(".mp3"):
+                    print("Audio file detected")
+                elif fileName.endswith(".txt"):
+                    print("Text file detected")
+                send_file(fileName)
+                print(f"[+] File sent to {host}")
+            
+            # Downloads a file
+            elif operation == "download":
+                download_file()
+                print(f"[+] File received from {host}")
+            
+            # Deletes a file
+            elif operation == "delete":
+                delete_file()
+            
+            # Prints the server directory
+            elif operation == "dir":
+                server_directory()
+            
+            # Handles subfolder operations
+            elif operation == "subfolder":
+                directory_op()
+            
+            # Prints the commands
+            elif operation == "help":
+                print("Welcome to help!")
+                print("Send: upload a file to the file sharing server.")
+                print("Download: download a file from the server.")
+                print("Delete: delete a file from the server.")
+                print("Dir: view a list of files and subdirectories in the server's file storage path.")
+                print("Subfolder: create folders or subfolders in the server's file storage path")
+            
+            # Exits the connection
+            elif operation == "exit":
+                s.close()
 
-# If the user did not have a valid login
-else:
-    print(response, "\nConnection closed")
-    s.close()
+    # If the user did not have a valid login
+    else:
+        print(response, "\nConnection closed")
+        s.close()
