@@ -108,13 +108,13 @@ def server_delete(client_socket, filename, name):
     try:
         os.remove(filename)
         client_socket.send(f"0File '{filename}' has been deleted.".encode())
-        print("Deletion requested from {name} successful.")
+        print(f"Deletion requested from {name} successful.")
     except FileNotFoundError:
         client_socket.send(f"1File '{filename}' not found.".encode())
-        print("Deletion requested from {name} unsuccessful.")
+        print(f"Deletion requested from {name} unsuccessful.")
     except PermissionError:
         client_socket.send(f"2Permission denied: '{filename}'".encode())
-        print("Permition denied for deletion request from {name}.")
+        print(f"Permition denied for deletion request from {name}.")
     except Exception as e:
         client_socket.send(f"3Error occurred while deleting the file: {e}'".encode())
         print(f"Error: {e}, ocurred while servicing delete request from {name}.")
