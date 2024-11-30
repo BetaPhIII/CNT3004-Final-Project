@@ -38,14 +38,15 @@ def upload_file(filename):
     filename = os.path.basename(filename)
     # Kills the function if the filename does not exist
     if not os.path.isfile(filename):
-        
         print(f"File '{filename}' not found.")
+        return
+    elif filename in RESTRICTED_FILES:
+        print("Operation not permitted")
         return
     
     # Gets the size of the selected file
     filesize = os.path.getsize(filename)
 
-    print(filesize)
     # Time when the upload starts
     t1 = time.perf_counter()
 
@@ -73,19 +74,20 @@ def upload_file(filename):
         else:
             print("Did not quite catch that...")
     
-    # Start sending the file
+    # Start sending file to the client
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "rb") as f:
         while True:
             
-            # Read the bytes from the file
+            # Read bytes as they are sent
             bytes_read = f.read(BUFFER_SIZE)
             
-            # If the transmitting is done
+            # If transmission is complete
             if not bytes_read:
+                # File send has completed
                 break
             
-            # Use sendall to assure transmission in busy networks
+            # Verify transmission via sendall function
             s.sendall(bytes_read)
             
             # Update the progress bar

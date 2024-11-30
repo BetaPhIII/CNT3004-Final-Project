@@ -1,3 +1,6 @@
+"""
+Server for file management systems and integration with client
+"""
 import socket
 import tqdm
 import os
@@ -88,9 +91,6 @@ def server_receive(client_socket):
     else:
         client_socket.send("False".encode())
         print(f"The file '{filename}' does not exist in the current directory.")
-    
-    # Remove absolute path if there is
-    filename = os.path.basename(filename)
 
     # Start receiving the file from the socket
     progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
@@ -122,26 +122,27 @@ def server_send(client_socket, filename):
     # Sends a response to the client
     client_socket.send("File found".encode())
 
-    # Gets the file size
+    # Gets the file-size
     filesize = os.path.getsize(filename)
 
-    # Sends the file-name and file-size to the client
+    # Sends file-name and file-size to the client
     client_socket.send(f"{os.path.basename(filename)}{SEPARATOR}{filesize}".encode())
 
-    # Start sending the file to the client
+    # Start sending file to the client
     progress = tqdm.tqdm(total=filesize, desc=f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "rb") as f:
         
         while True:
             
-            # Read the bytes from the file
+            # Read bytes as they are sent
             bytes_read = f.read(BUFFER_SIZE)
             
+            # If transmission is complete
             if not bytes_read:
-                # File transmitting is done
+                # File send has completed
                 break
             
-            # We use sendall to assure transmission in busy networks
+            # Verify transmission via sendall function
             client_socket.sendall(bytes_read)
 
             # Update progress bar
