@@ -42,6 +42,7 @@ def send_file(filename):
     # Gets the size of the selected file
     filesize = os.path.getsize(filename)
 
+    print(filesize)
     # Time when the upload starts
     t1 = time.perf_counter()
 
@@ -59,11 +60,11 @@ def send_file(filename):
         print(f"Client side: {filename}\t{os.path.getsize(filename)}\t\tServer side: {filename}\t{response}")
         
         # Prompts the user to overwrite the file
-        choice = input("(Y/N)\n")
-        if choice == "Y":
+        choice = input("(Y/N)\n").lower()
+        if choice == "y":
             print("Overwriting file...")
             s.send(choice.encode())
-        elif choice == "N":
+        elif choice == "n":
             s.send(choice.encode())
             return
         else:
@@ -112,14 +113,14 @@ def download_file():
         # Prevents the user from downloading the password file and the server sourcecode
         if filename == ".RESOURCES.csv" or filename == "Server.py":
             print("Operation not permitted")
+            continue
         elif filename.endswith(".mp4"):
             print("Video file detected")
         elif filename.endswith(".mp3"):
             print("Audio file detected")
         elif filename.endswith(".txt"):
             print("Text file detected")
-        else:
-            break
+        break
     
     # Send the filename to the server
     s.send(f"{filename}".encode())
@@ -202,14 +203,14 @@ def delete_file():
         # Prevents the user from deleting the password file and server source code
         if filename == "Server.py" or filename == "../Client.py" or filename == ".RESOURCES.csv":
             print("Operation not permitted")
+            continue
         elif filename.endswith(".mp4"):
             print("Video file detected")
         elif filename.endswith(".mp3"):
             print("Audio file detected")
         elif filename.endswith(".txt"):
             print("Text file detected")
-        else:
-            break
+        break
 
     # Send the filename to the server
     s.send(f"{filename}".encode())
@@ -339,12 +340,11 @@ if(response != 'Login Failed'):
         
         # Prompts the user for the operation
         operation = input("Choose an operation (Upload, Download, Delete, Dir, Subfolder, Help, Exit): ").strip().lower()
-        
         # Sends the operation to the server
         s.send(str.encode(operation))
         
         # Uploads a file
-        if operation.lower() == "upload":
+        if operation == "upload":
             root_directory = os.getcwd()  # Dynamically get the current working directory
             root_name = os.path.basename(root_directory) or root_directory
             print(root_name)
@@ -360,24 +360,24 @@ if(response != 'Login Failed'):
             print(f"[+] File sent to {host}")
         
         # Downloads a file
-        elif operation.lower() == "download":
+        elif operation == "download":
             download_file()
             print(f"[+] File received from {host}")
         
         # Deletes a file
-        elif operation.lower() == "delete":
+        elif operation == "delete":
             delete_file()
         
         # Prints the server directory
-        elif operation.lower() == "dir":
+        elif operation == "dir":
             server_directory()
         
         # Handles subfolder operations
-        elif operation.lower() == "subfolder":
+        elif operation == "subfolder":
             directory_op()
         
         # Prints the commands
-        elif operation.lower() == "help":
+        elif operation == "help":
             print("Welcome to help!")
             print("Send: upload a file to the file sharing server.")
             print("Download: download a file from the server.")

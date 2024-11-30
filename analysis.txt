@@ -1,5 +1,0 @@
---------------------------
-Socket created in 17.82 ms
---------------------------
-> Transfer Speed: 1.74 MB/s, Time Sent: 2024-11-28 01:06:03.990758
-> Transfer Speed: 25.16 B/s, Time Sent: 2024-11-28 01:06:33.192512

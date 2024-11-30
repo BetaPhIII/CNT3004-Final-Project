@@ -112,7 +112,7 @@ def server_receive(client_socket, name):
             progress.update(len(bytes_read))
 
 # Handles sending files to the client    
-def server_download(client_socket, filename, name):
+def server_send(client_socket, filename, name):
     
     # If the requested file is not in the server directory
     if not os.path.isfile(filename):
@@ -260,7 +260,7 @@ def process_handler(client_socket, address):
         operation = operation.decode()
         
         # Handles the client sending files to the server
-        if operation == "send":
+        if operation == "upload":
             server_receive(client_socket,name)
             print(f"[+] Finished receiving file from {cip}: {name}")
 
@@ -284,7 +284,7 @@ def process_handler(client_socket, address):
                 
                 # Handles sending files to the client
                 if operation == "download":
-                    server_download(client_socket, filename, name)
+                    server_send(client_socket, filename, name)
                     print(f"[+] Finished sending {filename} to {cip}: {name}")
                 
                 # Handles deleting files from the server
