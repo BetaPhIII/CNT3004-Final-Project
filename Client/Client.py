@@ -338,13 +338,13 @@ if(response != 'Login Failed'):
     while operation != "exit":
         
         # Prompts the user for the operation
-        operation = input("Choose an operation (Send, Download, Delete, Dir, Subfolder, Help, Exit): ").strip().lower()
+        operation = input("Choose an operation (Upload, Download, Delete, Dir, Subfolder, Help, Exit): ").strip().lower()
         
         # Sends the operation to the server
         s.send(str.encode(operation))
         
         # Uploads a file
-        if operation == "send":
+        if operation.lower() == "upload":
             root_directory = os.getcwd()  # Dynamically get the current working directory
             root_name = os.path.basename(root_directory) or root_directory
             print(root_name)
@@ -360,24 +360,24 @@ if(response != 'Login Failed'):
             print(f"[+] File sent to {host}")
         
         # Downloads a file
-        elif operation == "download":
+        elif operation.lower() == "download":
             download_file()
             print(f"[+] File received from {host}")
         
         # Deletes a file
-        elif operation == "delete":
+        elif operation.lower() == "delete":
             delete_file()
         
         # Prints the server directory
-        elif operation == "dir":
+        elif operation.lower() == "dir":
             server_directory()
         
         # Handles subfolder operations
-        elif operation == "subfolder":
+        elif operation.lower() == "subfolder":
             directory_op()
         
         # Prints the commands
-        elif operation == "help":
+        elif operation.lower() == "help":
             print("Welcome to help!")
             print("Send: upload a file to the file sharing server.")
             print("Download: download a file from the server.")
