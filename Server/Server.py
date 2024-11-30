@@ -79,18 +79,15 @@ def server_receive(client_socket, name):
         response = response.decode()
         
         # 'Y' to overwrite the file, 'N' to kill the transfer
-        if response == "N":
+        if response == "n":
             return
-        elif response == "Y":
+        elif response == "y":
             print("Overwriting")
-
-           
+        else:
+            return
     else:
-        client_socket.send("False".encode())
         print(f"The file '{filename}' does not exist in the current directory.")
     
-    # Remove absolute path if there is
-    filename = os.path.basename(filename)
 
     # Start receiving the file from the socket
     progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
@@ -153,28 +150,28 @@ def server_delete(client_socket, filename, name):
     # Attempts to delete the file
     try:
         os.remove(filename)
-        client_socket.send(f"0File '{filename}' has been deleted.".encode())
-        print("Deletion requested from {name} successful.")
+        client_socket.send(f"File '{filename}' has been deleted sucessfully.".encode())
+        print(f"Deletion requested from {name} successful.")
     
     # The file did not exist
     except FileNotFoundError:
-        client_socket.send(f"1File '{filename}' not found.".encode())
-        print("Deletion requested from {name} unsuccessful.")
+        client_socket.send(f"File '{filename}' not found on server.".encode())
+        print(f"Deletion requested from {name} unsuccessful.")
     
     # User does not have permission to delete the file
     except PermissionError:
-        client_socket.send(f"2Permission denied: '{filename}'".encode())
-        print("Permition denied for deletion request from {name}.")
+        client_socket.send(f"Permission denied: '{filename}'".encode())
+        print(f"Permition denied for deletion request from {name}.")
     
     # General error handling
     except Exception as e:
-        client_socket.send(f"3Error occurred while deleting the file: {e}'".encode())
+        client_socket.send(f"Error occurred while deleting the file: '{filename}'.\n {e}'".encode())
         print(f"Error: {e}, ocurred while servicing delete request from {name}.")
 
 # Prints the server directory
 def print_dir(directory, prefix=""):
     
-    dir = "\n"
+    dir = ""
     
     # Lists and sorts all entries in the directory
     entries = [e for e in os.listdir(directory) if not e.startswith('.')]    
@@ -193,14 +190,13 @@ def print_dir(directory, prefix=""):
         dir += f"{new_prefix}{d}\n"
         
         # Recursively print the subdirectory
-        print_dir(os.path.join(directory, d), prefix + ("   " if is_last else " ┃ "))
+        dir += print_dir(os.path.join(directory, d), prefix + ("   " if is_last else " ┃ "))
 
     # Print files
     for idx, f in enumerate(files):
         is_last = idx == len(files) - 1
         file_prefix = prefix + (" ┗ " if is_last else " ┣ ")
         dir += f"{file_prefix}{f}\n"
-    
     # returns the directory
     return dir
 
@@ -270,11 +266,10 @@ def process_handler(client_socket, address):
             # Gets server directory
             root_directory = os.getcwd()
             root_name = os.path.basename(root_directory) or root_directory
-            dir = root_name
+            dir = root_name + "\n"
             dir += print_dir(root_directory)
             print(dir)
-            
-            # Send it to the client to choose a file
+            #sending it to client to choose a file
             client_socket.send(str.encode(f'{dir}'))
             if operation == "download" or operation == "delete":
                 
@@ -319,15 +314,6 @@ def process_handler(client_socket, address):
             client_socket.close()
             break
         
-
-def find_csv(directory):
-    # Loop through all the directories and files in the specified directory
-    for file in os.listdir(directory):
-            if file.endswith('.csv'):
-                # Return the full path of the first .xml file found
-                return os.path.join(directory, file)
-    return None  # If no .xml file is found
-
 # Gets the ip address of the host computer
 def get_local_ip():
     

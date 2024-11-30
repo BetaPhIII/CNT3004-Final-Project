@@ -1,5 +1,5 @@
 """
-Client that sends the file (uploads)
+Client for file operations: upload, download, delete, and directory management.
 """
 import socket
 import tqdm
@@ -9,25 +9,26 @@ import time
 
 SEPARATOR = "<SEPARATOR>"
 BUFFER_SIZE = 1024 * 4 #4KB
+# Define restricted files
+RESTRICTED_FILES = [".RESOURCES.csv", "Server.py", "Client.py"]
 
 # Handles the creation or deletion of directories
 def directory_op():
     
     # Prompts the user whether they want to create or delete a directory
-    choice = input("Create or delete file (type \"create\" or \"delete\"): ")
+    choice = input("Create or delete file (type \"create\" or \"delete\"): ").strip().lower()
     
     # Sends the choice to the server
-    s.send(f"{choice}".encode())
+    s.send(choice.encode())
     
     # Prompts the name of the directory that the user wants to create or delete
     dir_name = input("Directory name: ")
 
     # Sends the directory name to the server
-    s.send(f"{dir_name}".encode())
+    s.send(dir_name.encode())
     
     # Recieves and prints the response from the server
-    response = s.recv(2048)
-    response = response.decode()
+    response = s.recv(2048).decode()
     print(response)
 
 # Handles uploading files to the server
@@ -50,8 +51,7 @@ def upload_file(filename):
     s.send(f"{filename}{SEPARATOR}{filesize}".encode())
 
     # Gets the response from the server
-    response = s.recv(2048)
-    response = response.decode()
+    response = s.recv(2048).decode()
 
     # If the uploaded file is already in the server directory:
     if response.isdigit():
@@ -60,12 +60,13 @@ def upload_file(filename):
         print(f"Client side: {filename}\t{os.path.getsize(filename)}\t\tServer side: {filename}\t{response}")
         
         # Prompts the user to overwrite the file
-        choice = input("(Y/N)\n").lower()
+        choice = input("(Y/N)\n").lower().strip()
+        s.send(choice.encode())
+        # 'y' to overwrite the file, 'n' to kill the transfer
         if choice == "y":
             print("Overwriting file...")
-            s.send(choice.encode())
         elif choice == "n":
-            s.send(choice.encode())
+            print("Cancelling operation...")
             return
         else:
             print("Did not quite catch that...")
@@ -101,24 +102,26 @@ def upload_file(filename):
 def download_file():
 
     # Recieving and prints the directory of the server
-    response = s.recv(2048)
-    response = response.decode()
+    response = s.recv(2048).decode()
     print(response)
 
     while True:
 
         # Prompts the user for the file to download
         filename = input("Enter the filename to download: ")
-        
+
+        # Normalize the filename
+        base_filename = os.path.basename(filename)
+
         # Prevents the user from downloading the password file and the server sourcecode
-        if filename == ".RESOURCES.csv" or filename == "Server.py":
+        if base_filename in RESTRICTED_FILES:
             print("Operation not permitted")
             continue
-        elif filename.endswith(".mp4"):
+        elif base_filename.endswith(".mp4"):
             print("Video file detected")
-        elif filename.endswith(".mp3"):
+        elif base_filename.endswith(".mp3"):
             print("Audio file detected")
-        elif filename.endswith(".txt"):
+        elif base_filename.endswith(".txt"):
             print("Text file detected")
         break
     
@@ -129,8 +132,7 @@ def download_file():
     t1 = time.perf_counter()
 
     # Recieves the response from the server
-    response = s.recv(2048)
-    response = response.decode()
+    response = s.recv(2048).decode()
     
     # If the file does not exist
     if(response == "File not found"):
@@ -154,12 +156,9 @@ def download_file():
         s.close()
         return
 
-    # Remove absolute path if there is
-    filename = os.path.basename(filename)
-
     # Start receiving the file from the socket
-    progress = tqdm.tqdm(total=filesize, desc = f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
-    with open(filename, "wb") as f:
+    progress = tqdm.tqdm(total=filesize, desc = f"Receiving {base_filename}", unit="B", unit_scale=True, unit_divisor=1024)
+    with open(base_filename, "wb") as f:
 
         # Track how much was already received
         bytes_received = 0  
@@ -191,55 +190,41 @@ def download_file():
 def delete_file():
 
     # Recieving and prints the directory of the server
-    response = s.recv(2048)
-    response = response.decode()
+    response = s.recv(2048).decode()
     print(response)
 
     while True:
 
         # Prompts the user for the file they want to delete
         filename = input("Enter the filename to delete: ")
+
+        # Normalize the filename
+        base_filename = os.path.basename(filename)
         
         # Prevents the user from deleting the password file and server source code
-        if filename == "Server.py" or filename == "../Client.py" or filename == ".RESOURCES.csv":
+        if base_filename in RESTRICTED_FILES:
             print("Operation not permitted")
             continue
-        elif filename.endswith(".mp4"):
+        elif base_filename.endswith(".mp4"):
             print("Video file detected")
-        elif filename.endswith(".mp3"):
+        elif base_filename.endswith(".mp3"):
             print("Audio file detected")
-        elif filename.endswith(".txt"):
+        elif base_filename.endswith(".txt"):
             print("Text file detected")
         break
 
     # Send the filename to the server
-    s.send(f"{filename}".encode())
+    s.send(filename.encode())
 
     # Recieves and prints the server response
-    response = s.recv(2048)
-    response = response.decode()
-    if(response[0] == "0"):
-        print(response[1:])
-    elif(response[0] == "1"):
-        print(response[1:])
-    elif(response[0] == "2"):
-        print(response[1:])
-    else:
-        print(response[1:])
-
-    # Types of responses
-''' Response : Status of Connection :
-    0 : File deleted
-    1 : File not found
-    2 : File is being processed
-# '''
+    response = s.recv(2048).decode()
+    print(response)
 
 # Prints the server directory
 def server_directory():
     
     # Recieves and prints the server directory
-    response = s.recv(2048)
-    response = response.decode()
+    response = s.recv(2048).decode()
     print(response)
     return response
 
