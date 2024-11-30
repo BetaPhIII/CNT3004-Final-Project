@@ -260,7 +260,7 @@ def process_handler(client_socket, address):
         
         # Handles the client sending files to the server
         if operation == "upload":
-            server_receive(client_socket,name)
+            server_receive(client_socket)
             print(f"[+] Finished receiving file from {cip}: {name}")
 
         # Handles sending files to the client, deleting files, and printing the server directory
@@ -281,7 +281,7 @@ def process_handler(client_socket, address):
                 
                 # Handles sending files to the client
                 if operation == "download":
-                    server_send(client_socket, filename, name)
+                    server_send(client_socket, filename)
                     print(f"[+] Finished sending {filename} to {cip}: {name}")
                 
                 # Handles deleting files from the server
