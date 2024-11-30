@@ -291,33 +291,34 @@ def process_handler(client_socket, address):
 
         # Handles creating and deleting subfolders
         elif operation == "subfolder":
-            choice = client_socket.recv(2048)
-            choice = choice.decode()
-            while True:
-                
-                # Handles creating subfolders
-                if choice == "create":
-                    dir = client_socket.recv(2048)
-                    dir = dir.decode()
-                    try:
-                        os.mkdir(dir)
-                        client_socket.send(str.encode(f'Successfully created directory {dir}'))
-                    except Exception as e:
-                        print(f"mkdir operation failed with error: {e}")
-                    break
+            # Receive client's choice to either create or delete a subfolder
+            choice = client_socket.recv(2048).decode()
+            # If the input is invalid then cancel operation
+            if choice != "create" or "delete":
+                return
+            
+            #Receive the subfolder's name
+            dir = client_socket.recv(2048).decode()
 
-                # Handles deleting subfolders
-                elif choice == "delete":
-                    dir = client_socket.recv(2048)
-                    dir = dir.decode()
-                    try:
-                        os.rmdir(dir)
-                        client_socket.send(str.encode(f'Successfully removed directory {dir}'))
-                    except Exception as e:
-                        print(f"rmdir operation failed with error: {e}")
-                        client_socket.send(str.encode(f'Failed to remove directory {dir}'))
-                    break   
-        
+            # Handles creating subfolders
+            if choice == "create":
+                try:
+                    os.mkdir(dir)
+                    client_socket.send(str.encode(f'Successfully created directory {dir}'))
+                except Exception as e:
+                    print(f"mkdir operation failed with error: {e}")
+
+            # Handles deleting subfolders
+            elif choice == "delete":
+                dir = client_socket.recv(2048)
+                dir = dir.decode()
+                try:
+                    os.rmdir(dir)
+                    client_socket.send(str.encode(f'Successfully removed directory {dir}'))
+                except Exception as e:
+                    print(f"rmdir operation failed with error: {e}")
+                    client_socket.send(str.encode(f'Failed to remove directory {dir}'))
+                                            
         # Exits the connection and closes the socket
         elif operation == "exit":
             print(f"[+] {address[1]}: {name} disconnected.")

@@ -20,7 +20,12 @@ def directory_op():
     
     # Sends the choice to the server
     s.send(choice.encode())
-    
+
+    # Filter invalid input
+    if choice != "create" or "delete":
+        print("Invalid input...")
+        return
+        
     # Prompts the name of the directory that the user wants to create or delete
     dir_name = input("Directory name: ")
 
