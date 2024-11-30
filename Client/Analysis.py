@@ -1,3 +1,6 @@
+"""
+Analysis module for system performance calculations and storage
+"""
 import datetime
 
 def initializeData(socketTime):

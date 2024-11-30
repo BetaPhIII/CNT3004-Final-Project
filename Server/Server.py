@@ -1,3 +1,6 @@
+"""
+Server for file management systems and integration with client
+"""
 import socket
 import tqdm
 import os
@@ -48,7 +51,7 @@ def add(file, key, value):
         writer.writerow([key, value])
 
 # Handles files being uploaded to the server
-def server_receive(client_socket, name):
+def server_receive(client_socket):
     
     # Receive and parse file metadata
     received = b""
@@ -86,10 +89,8 @@ def server_receive(client_socket, name):
         else:
             return
     else:
+        client_socket.send("False".encode())
         print(f"The file '{filename}' does not exist in the current directory.")
-    
-    # Remove absolute path if there is
-    filename = os.path.basename(filename)
 
     # Start receiving the file from the socket
     progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
@@ -111,7 +112,7 @@ def server_receive(client_socket, name):
             progress.update(len(bytes_read))
 
 # Handles sending files to the client    
-def server_send(client_socket, filename, name):
+def server_send(client_socket, filename):
     
     # If the requested file is not in the server directory
     if not os.path.isfile(filename):
@@ -121,26 +122,27 @@ def server_send(client_socket, filename, name):
     # Sends a response to the client
     client_socket.send("File found".encode())
 
-    # Gets the file size
+    # Gets the file-size
     filesize = os.path.getsize(filename)
 
-    # Sends the file-name and file-size to the client
+    # Sends file-name and file-size to the client
     client_socket.send(f"{os.path.basename(filename)}{SEPARATOR}{filesize}".encode())
 
-    # Start sending the file to the client
+    # Start sending file to the client
     progress = tqdm.tqdm(total=filesize, desc=f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
     with open(filename, "rb") as f:
         
         while True:
             
-            # Read the bytes from the file
+            # Read bytes as they are sent
             bytes_read = f.read(BUFFER_SIZE)
             
+            # If transmission is complete
             if not bytes_read:
-                # File transmitting is done
+                # File send has completed
                 break
             
-            # We use sendall to assure transmission in busy networks
+            # Verify transmission via sendall function
             client_socket.sendall(bytes_read)
 
             # Update progress bar
@@ -259,7 +261,7 @@ def process_handler(client_socket, address):
         
         # Handles the client sending files to the server
         if operation == "upload":
-            server_receive(client_socket,name)
+            server_receive(client_socket)
             print(f"[+] Finished receiving file from {cip}: {name}")
 
         # Handles sending files to the client, deleting files, and printing the server directory
@@ -280,7 +282,7 @@ def process_handler(client_socket, address):
                 
                 # Handles sending files to the client
                 if operation == "download":
-                    server_send(client_socket, filename, name)
+                    server_send(client_socket, filename)
                     print(f"[+] Finished sending {filename} to {cip}: {name}")
                 
                 # Handles deleting files from the server
