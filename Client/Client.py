@@ -33,7 +33,9 @@ def directory_op():
 
 # Handles uploading files to the server
 def upload_file(filename):
-
+    # Declare file path for uploading to subdirectories
+    filepath = filename
+    filename = os.path.basename(filename)
     # Kills the function if the filename does not exist
     if not os.path.isfile(filename):
         
@@ -47,8 +49,8 @@ def upload_file(filename):
     # Time when the upload starts
     t1 = time.perf_counter()
 
-    # Send the file name and file size to the server
-    s.send(f"{filename}{SEPARATOR}{filesize}".encode())
+    # Send the file path  and file size to the server
+    s.send(f"{filepath}{SEPARATOR}{filesize}".encode())
 
     # Gets the response from the server
     response = s.recv(2048).decode()

@@ -88,6 +88,8 @@ def server_receive(client_socket, name):
     else:
         print(f"The file '{filename}' does not exist in the current directory.")
     
+    # Remove absolute path if there is
+    filename = os.path.basename(filename)
 
     # Start receiving the file from the socket
     progress = tqdm.tqdm(range(filesize), f"Receiving {filename}", unit="B", unit_scale=True, unit_divisor=1024)
