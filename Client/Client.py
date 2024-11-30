@@ -32,7 +32,7 @@ def directory_op():
     print(response)
 
 # Handles uploading files to the server
-def upload_file(filename):
+def upload_file(filename, host):
     # Declare file path for uploading to subdirectories
     filepath = filename
     filename = os.path.basename(filename)
@@ -101,6 +101,7 @@ def upload_file(filename):
 
     # Adds upload to the analysis log
     Analysis.getData(filesize, t, 'uploaded')
+    print(f"[+] File sent to {host}")
 
 # Handles downloading files from the server
 def download_file():
@@ -346,8 +347,7 @@ if __name__ == "__main__":
                     print("Audio file detected")
                 elif fileName.endswith(".txt"):
                     print("Text file detected")
-                upload_file(fileName)
-                print(f"[+] File sent to {host}")
+                upload_file(fileName, host)
             
             # Downloads a file
             elif operation == "download":
