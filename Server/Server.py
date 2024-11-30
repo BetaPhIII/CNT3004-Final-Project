@@ -205,7 +205,7 @@ def print_dir(directory, prefix=""):
     return dir
 
 # Handles user authorization
-def login(s):
+def login(client_socket):
 
     # Request Username
     client_socket.send(str.encode('ENTER USERNAME : ')) 
