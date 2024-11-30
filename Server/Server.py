@@ -299,17 +299,24 @@ def process_handler(client_socket, address):
                 if choice == "create":
                     dir = client_socket.recv(2048)
                     dir = dir.decode()
-                    os.mkdir(dir)
-                    client_socket.send(str.encode(f'Successfully created directory {dir}'))
+                    try:
+                        os.mkdir(dir)
+                        client_socket.send(str.encode(f'Successfully created directory {dir}'))
+                    except Exception as e:
+                        print(f"mkdir operation failed with error: {e}")
                     break
 
                 # Handles deleting subfolders
                 elif choice == "delete":
                     dir = client_socket.recv(2048)
                     dir = dir.decode()
-                    os.rmdir(dir)
-                    client_socket.send(str.encode(f'Successfully removed directory {dir}'))
-                    break
+                    try:
+                        os.rmdir(dir)
+                        client_socket.send(str.encode(f'Successfully removed directory {dir}'))
+                    except Exception as e:
+                        print(f"rmdir operation failed with error: {e}")
+                        client_socket.send(str.encode(f'Failed to remove directory {dir}'))
+                    break   
         
         # Exits the connection and closes the socket
         elif operation == "exit":
