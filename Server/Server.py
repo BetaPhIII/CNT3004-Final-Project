@@ -48,7 +48,7 @@ def add(file, key, value):
         writer.writerow([key, value])
 
 # Handles files being uploaded to the server
-def server_receive(client_socket, name):
+def server_receive(client_socket):
     
     # Receive and parse file metadata
     received = b""
@@ -86,6 +86,7 @@ def server_receive(client_socket, name):
         else:
             return
     else:
+        client_socket.send("False".encode())
         print(f"The file '{filename}' does not exist in the current directory.")
     
     # Remove absolute path if there is
@@ -111,7 +112,7 @@ def server_receive(client_socket, name):
             progress.update(len(bytes_read))
 
 # Handles sending files to the client    
-def server_send(client_socket, filename, name):
+def server_send(client_socket, filename):
     
     # If the requested file is not in the server directory
     if not os.path.isfile(filename):
