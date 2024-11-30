@@ -31,7 +31,7 @@ def directory_op():
     print(response)
 
 # Handles uploading files to the server
-def send_file(filename):
+def upload_file(filename):
 
     # Kills the function if the filename does not exist
     if not os.path.isfile(filename):
@@ -357,7 +357,7 @@ if __name__ == "__main__":
                     print("Audio file detected")
                 elif fileName.endswith(".txt"):
                     print("Text file detected")
-                send_file(fileName)
+                upload_file(fileName)
                 print(f"[+] File sent to {host}")
             
             # Downloads a file
