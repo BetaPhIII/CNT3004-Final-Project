@@ -112,6 +112,12 @@ def download_file():
         # Prevents the user from downloading the password file and the server sourcecode
         if filename == ".RESOURCES.csv" or filename == "Server.py":
             print("Operation not permitted")
+        elif filename.endswith(".mp4"):
+            print("Video file detected")
+        elif filename.endswith(".mp3"):
+            print("Audio file detected")
+        elif filename.endswith(".txt"):
+            print("Text file detected")
         else:
             break
     
@@ -196,6 +202,12 @@ def delete_file():
         # Prevents the user from deleting the password file and server source code
         if filename == "Server.py" or filename == "../Client.py" or filename == ".RESOURCES.csv":
             print("Operation not permitted")
+        elif filename.endswith(".mp4"):
+            print("Video file detected")
+        elif filename.endswith(".mp3"):
+            print("Audio file detected")
+        elif filename.endswith(".txt"):
+            print("Text file detected")
         else:
             break
 
@@ -338,6 +350,12 @@ if(response != 'Login Failed'):
             print(root_name)
             print_dir(root_directory)
             fileName = input("Enter the file name to upload: ")
+            if fileName.endswith(".mp4"):
+                print("Video file detected")
+            elif fileName.endswith(".mp3"):
+                print("Audio file detected")
+            elif fileName.endswith(".txt"):
+                print("Text file detected")
             send_file(fileName)
             print(f"[+] File sent to {host}")
         
