@@ -272,7 +272,7 @@ def process_handler(client_socket, address):
             root_name = os.path.basename(root_directory) or root_directory
             dir = root_name + "\n"
             dir += print_dir(root_directory)
-            #sending it to client to choose a file
+            # Sending it to client to choose a file
             client_socket.send(str.encode(f'{dir}'))
             if operation == "download" or operation == "delete":
                 
@@ -307,6 +307,7 @@ def process_handler(client_socket, address):
                     client_socket.send(str.encode(f'Successfully created directory {dir}'))
                 except Exception as e:
                     print(f"mkdir operation failed with error: {e}")
+                    client_socket.send(str.encode(f'Failed to create directory {dir}'))
 
             # Handles deleting subfolders
             elif choice == "delete":
