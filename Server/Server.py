@@ -66,6 +66,9 @@ def server_receive(client_socket):
         received = received.decode('utf-8', errors='ignore')
         filename, filesize = received.split(SEPARATOR, 1)
         filesize = int(filesize)
+        if filesize <= 0:
+            print("Oops unexistent file")
+            return
     
     except (UnicodeDecodeError, ValueError) as e:
         
@@ -110,6 +113,9 @@ def server_receive(client_socket):
             f.write(bytes_read)
             bytes_received += len(bytes_read)
             progress.update(len(bytes_read))
+    
+    print(f"[+] Finished receiving file '{filename}' from {cip}")
+
 
 # Handles sending files to the client    
 def server_send(client_socket, filename):
@@ -147,6 +153,8 @@ def server_send(client_socket, filename):
 
             # Update progress bar
             progress.update(len(bytes_read))  
+    print(f"[+] Finished sending {filename} to {cip}")
+
 
 # Handles deleting files from the server
 def server_delete(client_socket, filename, name):
@@ -262,7 +270,6 @@ def process_handler(client_socket, address):
         # Handles the client sending files to the server
         if operation == "upload":
             server_receive(client_socket)
-            print(f"[+] Finished receiving file from {cip}: {name}")
 
         # Handles sending files to the client, deleting files, and printing the server directory
         elif operation == "download" or operation == "delete" or operation == "dir":
@@ -284,7 +291,6 @@ def process_handler(client_socket, address):
                 # Handles sending files to the client
                 if operation == "download":
                     server_send(client_socket, filename)
-                    print(f"[+] Finished sending {filename} to {cip}: {name}")
                 
                 # Handles deleting files from the server
                 else:

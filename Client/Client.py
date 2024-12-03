@@ -45,9 +45,11 @@ def upload_file(filename, host):
     # Kills the function if the filename does not exist
     if not os.path.isfile(filename):
         print(f"File '{filename}' not found.")
+        s.send(f"{filepath}{SEPARATOR}0".encode())
         return
     elif filename in RESTRICTED_FILES:
         print("Operation not permitted")
+        s.send(f"{filepath}{SEPARATOR}0".encode())
         return
     
     # Gets the size of the selected file
@@ -107,6 +109,7 @@ def upload_file(filename, host):
 
     # Adds upload to the analysis log
     Analysis.getData(filesize, t, 'uploaded')
+    print(f"[+] File '{filename}' sent to {host}")
 
 # Handles downloading files from the server
 def download_file():
@@ -196,6 +199,8 @@ def download_file():
 
     # Adds download to the analysis log
     Analysis.getData(filesize, t, 'downloaded')
+    print(f"[+] File received from {host}")
+
 
 def delete_file():
 
@@ -354,14 +359,12 @@ if __name__ == "__main__":
                     print("Text file detected")
                 try:
                     upload_file(fileName, host)
-                    print(f"[+] File sent to {host}")
                 except Exception as e:
                     print(f"Error while uploading file: {e}")
             
             # Downloads a file
             elif operation == "download":
                 download_file()
-                print(f"[+] File received from {host}")
             
             # Deletes a file
             elif operation == "delete":
