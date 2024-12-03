@@ -29,6 +29,8 @@ def directory_op():
         
     # Prompts the name of the directory that the user wants to create or delete
     dir_name = input("Directory name: ")
+    if dir_name == "":
+        dir_name = "/"
 
     # Sends the directory name to the server
     s.send(dir_name.encode())
@@ -81,6 +83,7 @@ def upload_file(filename, host):
             return
         else:
             print("Did not quite catch that...")
+            return
     
     # Start sending file to the client
     progress = tqdm.tqdm(range(filesize), f"Sending {filename}", unit="B", unit_scale=True, unit_divisor=1024)
@@ -136,6 +139,8 @@ def download_file():
             print("Audio file detected")
         elif base_filename.endswith(".txt"):
             print("Text file detected")
+        elif filename == "":
+            filename = " "
         break
     
     # Send the filename to the server
@@ -226,6 +231,8 @@ def delete_file():
             print("Audio file detected")
         elif base_filename.endswith(".txt"):
             print("Text file detected")
+        elif filename == "":
+            filename = " "
         break
 
     # Send the filename to the server
@@ -364,7 +371,10 @@ if __name__ == "__main__":
             
             # Downloads a file
             elif operation == "download":
-                download_file()
+                try:
+                    download_file()
+                except Exception as e:
+                    print(f"Error while uploading file: {e}")
             
             # Deletes a file
             elif operation == "delete":
