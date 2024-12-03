@@ -285,16 +285,26 @@ def login(s):
     
     response = s.recv(2048) #ENTER USERNAME : 
     
+    while True:
     # Gets user name
-    name = input(response.decode())	
+        name = input(response.decode())	
+        if name == "":
+            print("Invalid name, try again...")
+        else:
+            break
     
     # Sends username to server
     s.send(str.encode(name)) 
     
     response = s.recv(2048)#ENTER PASSWORD :
     
+    while True:
     # Input Password
-    password = input(response.decode())
+        password = input(response.decode())
+        if password == "":
+            print("Invalid password, try again...")
+        else:
+            break
     
     #send password to server
     s.send(str.encode(password))
