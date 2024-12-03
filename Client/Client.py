@@ -16,15 +16,16 @@ RESTRICTED_FILES = [".RESOURCES.csv", "Server.py", "Client.py"]
 def directory_op():
     
     # Prompts the user whether they want to create or delete a directory
-    choice = input("Create or delete file (type \"create\" or \"delete\"): ").strip().lower()
+    choice = input("Create or delete file (type \"create\" or \"delete\"): ").lower().strip()
     
     # Sends the choice to the server
     s.send(choice.encode())
-
+    
     # Filter invalid input
-    if choice != "create" or "delete":
+    if choice not in ("create", "delete"):
         print("Invalid input...")
         return
+
         
     # Prompts the name of the directory that the user wants to create or delete
     dir_name = input("Directory name: ")
@@ -106,7 +107,6 @@ def upload_file(filename, host):
 
     # Adds upload to the analysis log
     Analysis.getData(filesize, t, 'uploaded')
-    print(f"[+] File sent to {host}")
 
 # Handles downloading files from the server
 def download_file():
@@ -352,7 +352,11 @@ if __name__ == "__main__":
                     print("Audio file detected")
                 elif fileName.endswith(".txt"):
                     print("Text file detected")
-                upload_file(fileName, host)
+                try:
+                    upload_file(fileName, host)
+                    print(f"[+] File sent to {host}")
+                except Exception as e:
+                    print(f"Error while uploading file: {e}")
             
             # Downloads a file
             elif operation == "download":
